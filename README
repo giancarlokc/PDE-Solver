@@ -1,3 +1,19 @@
+ICC Project - UFPR 2015
+
+Compile:
+
+    make
+    
+Run:
+
+    trab1 [Discretization of x] [Discretization de y] [Number of iterations]
+    
+Generate plot:
+
+    gnuplot -persist solution.txt
+    
+#########################################################################
+
 Trabalho ICC - UFPR 2015
 
 Para compilar:

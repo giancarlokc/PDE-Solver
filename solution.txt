@@ -1,0 +1,7 @@
+set title "3D surface from a grid (matrix) of Z values"
+
+set xrange [ 0.0 : 2.0 ]
+set yrange [ 0.0 : 1.0 ]
+set ticslevel 0
+
+splot "out.data" u 1:2:3 with lines notitle

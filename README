@@ -1,0 +1,13 @@
+Trabalho ICC - UFPR 2015
+
+Para compilar:
+
+    make
+    
+Para executar:
+
+    trab1 [Discretização de x] [Discretização de y] [Número de iterações]
+    
+Para ver o plot:
+
+    gnuplot -persist solution.txt

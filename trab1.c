@@ -12,6 +12,8 @@
 // Domain: x = [0,2] , y = [0,1]
 
 #define DEBUG 1
+#define DOMAIN_LENGTH_X 2
+#define DOMAIN_LENGTH_Y 1
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -46,6 +48,11 @@ int main(int argc, char **argv) {
     }
     
     // Calculate hx and hy
-    
+    double hx = DOMAIN_LENGTH_X / nx;
+    double hy = DOMAIN_LENGTH_Y / ny;
+    #if DEBUG
+        printf("HX = %f\n", hx);
+        printf("HY = %f\n", hy);
+    #endif
     
 }

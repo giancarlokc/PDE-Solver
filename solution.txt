@@ -4,4 +4,4 @@ set xrange [ 0.0 : 2.0 ]
 set yrange [ 0.0 : 1.0 ]
 set ticslevel 0
 
-splot "out.data" u 1:2:3 with lines notitle
+splot "out.data" matrix nonuniform with lines t ''

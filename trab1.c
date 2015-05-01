@@ -1,12 +1,14 @@
 // UFPR - Iniciação a Computação Científica 2015
 
 // Output file:
-//  X1 Y1 Z1
-//  X2 Y2 Z2
-//  .  .  .
-//  .  .  .
-//  .  .  .
-//  Xn Yn Zn
+//  Hx x1	x2	. . .	xn
+//  y1 z11	z12 . . .	z1n			
+//  y2 z21	z22 . . .	z2n
+//  y3 z31	z32 . . .	z3n
+//  .  	.	 .  .
+//  .	.	 .	  .
+//  .	.    .		.
+//  yn zn1  zn2      	znn 
 
 // F(x) = 4*(PI)^2 * sin(2*PI*x) * sinh(2*PI*y)
 // Domain: x = [0,2] , y = [0,1]
@@ -31,6 +33,7 @@ int main(int argc, char **argv) {
     // Usage
     if(argc < 4) {
         printf("Usage: trab1 [N x] [N y] [Number of iterations]\n");
+		return -1;
     }
     
     // Get and check parameters

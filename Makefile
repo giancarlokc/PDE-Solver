@@ -1,5 +1,5 @@
-    PROG = trab1
-    OBJS   = $(PROG).o
+    PROG = pdeSolver
+    OBJS   = trab1.o
     CC     = gcc -g
 
 %.o: %.c
@@ -9,4 +9,4 @@ $(PROG):  $(OBJS)
 	$(CC) -o $@ $^
 
 clean:
-	@rm -f *~ *.bak
+	@rm -f *~ *.bak *.o $(PROG)

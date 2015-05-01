@@ -15,8 +15,10 @@
 
 #define DEBUG 1
 
-#define DOMAIN_LENGTH_X 2
-#define DOMAIN_LENGTH_Y 1
+#define DOMAIN_START_X 0.0
+#define DOMAIN_LENGTH_X 2.0
+#define DOMAIN_START_Y 0.0
+#define DOMAIN_LENGTH_Y 1.0
 
 #define GAUSS_SIDEL_METHOD 1
 #define OVER_RELAXATION_METHOD 2
@@ -36,27 +38,32 @@ int error(char* error_mesg, int line) {
 
 int main(int argc, char **argv) {
 
+	// ------------------------------------------------------- INPUT
+
     // Usage
     if(argc < 4) {
         printf("Usage: pdeSolver -nx <Nx> -ny <Ny> -i <maxIter> -m <gs | sor> -o arquivo_saida \n");
 		return -1;
     }
 
+	// General variables
+	long i, j;
+
 	// Parameters
-	double nx, ny, n_iterations;
+	long nx, ny, n_iterations;
 	int method;
 	char* output_file;
 
 	// Read parameters
-	int i=1;
+	i=1;
 	while(argc > i) {
 		if(argc > i+1) {
 			if(!strcmp(argv[i], "-nx")) {
-				nx = strtod(argv[i+1], NULL);
+				nx = atol(argv[i+1]);
 			} else if(!strcmp(argv[i], "-ny")) {
-				ny = strtod(argv[i+1], NULL);
+				ny = atol(argv[i+1]);
 			} else if(!strcmp(argv[i], "-i")) {
-				n_iterations = atoi(argv[i+1]);
+				n_iterations = atol(argv[i+1]);
 			} else if(!strcmp(argv[i], "-m")) {
 				if(!strcmp(argv[i+1], "gs")){
 					method = GAUSS_SIDEL_METHOD;
@@ -79,6 +86,8 @@ int main(int argc, char **argv) {
 		
 		i+=2;
 	}
+
+	// ------------------------------------------------------- PROCESSING
     
     // Calculate hx and hy
     double hx = DOMAIN_LENGTH_X / nx;
@@ -87,5 +96,55 @@ int main(int argc, char **argv) {
         printf("HX = %f\n", hx);
         printf("HY = %f\n", hy);
     #endif
-    
+
+	// ------------------------------------------------------- OUTPUT
+	
+	// Write the 'out.data' matrix for the plot
+	FILE *fp;
+	fp = fopen(output_file, "w+");
+	if(fp == NULL) {
+		printf("Can't create/open file %s\n", output_file);
+		return -1;
+	}
+
+    // write the points in x
+	fprintf(fp, " %ld", nx+1);
+	double current_point = DOMAIN_START_X;
+	for(i=0;i<nx+1;i++) {
+		fprintf(fp, " %f", current_point);
+		current_point += hx;
+	}
+	fprintf(fp, "\n");
+
+	// write the correspondent point in y and the z values
+	current_point = DOMAIN_START_Y;
+	for(i=0;i<ny+1;i++) {
+		fprintf(fp, " %f", current_point);
+		for(j=0;j<nx+1;j++) {
+			fprintf(fp, " 0.0");
+		}
+		fprintf(fp, "\n");
+		current_point += hy;
+	}
+
+	
+	fclose(fp);
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

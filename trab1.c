@@ -110,15 +110,21 @@ int main(int argc, char **argv) {
     for(i=0;i<n_lines*n_columns;i+=n_columns){
         for(j=0;j<n_columns;j++) {
             if(i/n_columns == j) {
-                // IF the point is an edge, mark the related B position with a zero ELSE mark it with a 1 (change 1 to the actual value)
+                // IF the point is an edge, mark the related B position with a zero ELSE mark it with a 1 (TODO: put the real value)
                 if((((i/n_columns)+(ny+1)) / (ny+1) == 1) || (((i/n_columns)+(ny+1)) / (ny+1) == nx+1) || (j % (ny+1)) == 0 || (j % (ny+1)) == ny ) {
                     matB[i/n_columns] = 0;
                 } else {
+                    // Put 3 on the variations of x (TODO: put the real values)
+                    mat[i + j - (nx+1)] = 3;
+                    mat[i + j + (nx+1)] = 3;
+                    // Put 4 on the variations of y (TODO: put the real values)
+                    mat[i + j - 1] = 4;
+                    mat[i + j + 1] = 4;
                     matB[i/n_columns] = 1;
                 }
                 mat[i + j] = 1;
             } else {
-                mat[i + j] = 0;
+                
             }
         }
     }

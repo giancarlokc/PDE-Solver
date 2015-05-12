@@ -96,6 +96,21 @@ int main(int argc, char **argv) {
         printf("HX = %f\n", hx);
         printf("HY = %f\n", hy);
     #endif
+    
+    // Alloc the memory
+    int n_lines = nx+1;
+    int n_columns = (2*(ny+1)) + 1;
+    double *mat = (double *) malloc(n_lines*n_columns*sizeof(double));
+    #if DEBUG
+        printf("Vector instanciated with %d positions.\n", n_lines*n_columns);
+    #endif
+    
+    // Set initial values
+    for(i=0;i<n_lines*n_columns;i+=n_columns){
+        for(j=0;j<n_columns;j++) {
+            mat[i + j] = 0;
+        }
+    }
 
 	// ------------------------------------------------------- OUTPUT
 	

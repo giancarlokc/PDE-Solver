@@ -98,19 +98,46 @@ int main(int argc, char **argv) {
     #endif
     
     // Alloc the memory
-    int n_lines = nx+1;
-    int n_columns = (2*(ny+1)) + 1;
+    long n_lines = (nx+1)*(ny+1);
+    long n_columns = (nx+1)*(ny+1); 
     double *mat = (double *) malloc(n_lines*n_columns*sizeof(double));
+    double *matB = (double*) malloc(n_lines*sizeof(double));
     #if DEBUG
-        printf("Vector instanciated with %d positions.\n", n_lines*n_columns);
+        printf("Vector instanciated with %ld positions.\n", n_lines*n_columns);
     #endif
     
     // Set initial values
     for(i=0;i<n_lines*n_columns;i+=n_columns){
         for(j=0;j<n_columns;j++) {
-            mat[i + j] = 0;
+            if(i/n_columns == j) {
+                // IF the point is an edge, mark the related B position with a zero ELSE mark it with a 1 (change 1 to the actual value)
+                if((((i/n_columns)+(ny+1)) / (nx+1) == 1) || (((i/n_columns)+(ny+1)) / (nx+1) == nx+1) || (j % (nx+1)) == 0 || (j % (nx+1)) == nx ) {
+                    matB[i/n_columns] = 0;
+                } else {
+                    matB[i/n_columns] = 1;
+                }
+                mat[i + j] = 1;
+            } else {
+                mat[i + j] = 0;
+            }
         }
     }
+    
+    // Print the data
+    printf("A= [\n");
+    for(i=0;i<n_lines*n_columns;i+=n_columns){
+        printf("    ");
+        for(j=0;j<n_columns;j++) {
+            printf("%f ", mat[i + j]);
+        }
+        printf("\n");
+    }
+    printf("]\n");
+    printf("B=[\n");
+    for(i=0;i<n_lines;i++) {
+        printf("    %f\n", matB[i]);
+    }
+    printf("]\n");
 
 	// ------------------------------------------------------- OUTPUT
 	

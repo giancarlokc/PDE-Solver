@@ -111,7 +111,7 @@ int main(int argc, char **argv) {
         for(j=0;j<n_columns;j++) {
             if(i/n_columns == j) {
                 // IF the point is an edge, mark the related B position with a zero ELSE mark it with a 1 (change 1 to the actual value)
-                if((((i/n_columns)+(ny+1)) / (nx+1) == 1) || (((i/n_columns)+(ny+1)) / (nx+1) == nx+1) || (j % (nx+1)) == 0 || (j % (nx+1)) == nx ) {
+                if((((i/n_columns)+(ny+1)) / (ny+1) == 1) || (((i/n_columns)+(ny+1)) / (ny+1) == nx+1) || (j % (ny+1)) == 0 || (j % (ny+1)) == ny ) {
                     matB[i/n_columns] = 0;
                 } else {
                     matB[i/n_columns] = 1;

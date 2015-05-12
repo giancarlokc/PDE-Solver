@@ -134,7 +134,11 @@ int main(int argc, char **argv) {
     for(i=0;i<n_lines*n_columns;i+=n_columns){
         printf("    ");
         for(j=0;j<n_columns;j++) {
-            printf("%f ", mat[i + j]);
+            if(mat[i + j] == 0) {
+                printf("   --    ");
+            } else {
+                printf("%f ", mat[i + j]);
+            }
         }
         printf("\n");
     }

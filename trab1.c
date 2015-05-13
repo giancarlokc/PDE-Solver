@@ -26,6 +26,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <math.h>
+
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 
 int error(char* error_mesg, int line) {
     printf("ERROR: %s", error_mesg);
@@ -53,6 +58,7 @@ int main(int argc, char **argv) {
 	long nx, ny, n_iterations;
 	int method;
 	char* output_file;
+	n_iterations = 5;
 
 	// Read parameters
 	i=1;
@@ -97,30 +103,54 @@ int main(int argc, char **argv) {
         printf("HY = %f\n", hy);
     #endif
     
+    double delta = (2/(hx*hx)) + (2/(hy*hy)) + (4*M_PI*M_PI);
+
+    #if DEBUG
+    	printf("Delta = %lf\n", delta);
+    #endif
+
+    double deltax = (-1/(hx*hx))/delta;
+    double deltay = (-1/(hy*hy))/delta;
+
+    #if DEBUG
+    	printf("Delta X = %lf\n", deltax);
+    	printf("Delta Y = %lf\n", deltay);
+    #endif
+
     // Alloc the memory
     long n_lines = (nx+1)*(ny+1);
     long n_columns = (nx+1)*(ny+1); 
     double *mat = (double *) malloc(n_lines*n_columns*sizeof(double));
     double *matB = (double*) malloc(n_lines*sizeof(double));
+    double *x = (double*) malloc(n_lines*sizeof(double));
     #if DEBUG
         printf("Vector instanciated with %ld positions.\n", n_lines*n_columns);
     #endif
     
+
+    double Fxy;
     // Set initial values
     for(i=0;i<n_lines*n_columns;i+=n_columns){
+    	Fxy = (4*M_PI*M_PI) * sin(2*M_PI*floor((i/n_columns)/3)*hx) * sinh(2*M_PI*((i/n_columns)%3)*hy);
+    	#if DEBUG
+	        printf("F(%ld) = %lf\n", i/n_columns, Fxy);
+	    #endif
         for(j=0;j<n_columns;j++) {
             if(i/n_columns == j) {
                 // IF the point is an edge, mark the related B position with a zero ELSE mark it with a 1 (TODO: put the real value)
-                if((((i/n_columns)+(ny+1)) / (ny+1) == 1) || (((i/n_columns)+(ny+1)) / (ny+1) == nx+1) || (j % (ny+1)) == 0 || (j % (ny+1)) == ny ) {
-                    matB[i/n_columns] = 0;
+                if(   ( ((i/n_columns)+(ny+1)) / (ny+1) == 1) 
+                   || ( ((i/n_columns)+(ny+1)) / (ny+1) == nx+1) 
+                   || (j % (ny+1)) == 0
+                   || (j % (ny+1)) == ny ) {
+                    matB[i/n_columns] = Fxy;
                 } else {
                     // Put 3 on the variations of x (TODO: put the real values)
-                    mat[i + j - (nx+1)] = 3;
-                    mat[i + j + (nx+1)] = 3;
+                    mat[i + j - (nx+1)] = deltax;
+                    mat[i + j + (nx+1)] = deltax;
                     // Put 4 on the variations of y (TODO: put the real values)
-                    mat[i + j - 1] = 4;
-                    mat[i + j + 1] = 4;
-                    matB[i/n_columns] = 1;
+                    mat[i + j - 1] = deltay;
+                    mat[i + j + 1] = deltay;
+                    matB[i/n_columns] = Fxy;
                 }
                 mat[i + j] = 1;
             } else {
@@ -135,9 +165,9 @@ int main(int argc, char **argv) {
         printf("    ");
         for(j=0;j<n_columns;j++) {
             if(mat[i + j] == 0) {
-                printf("   --    ");
+                printf("    --     ");
             } else {
-                printf("%f ", mat[i + j]);
+                printf("%10f ", mat[i + j]);
             }
         }
         printf("\n");
@@ -146,6 +176,26 @@ int main(int argc, char **argv) {
     printf("B=[\n");
     for(i=0;i<n_lines;i++) {
         printf("    %f\n", matB[i]);
+    }
+    printf("]\n");
+
+    double soma;
+    double temp;
+    long k;
+    for (k=0; k<n_iterations; ++k) {
+    	for(i=0;i<n_lines*n_columns;i+=n_columns) {
+    		temp = matB[i/n_columns];
+    		for (j=0; j<n_columns; ++j) {
+    			temp -= mat[i+j]*x[j];
+    		}
+    		temp += mat[i+(i/n_columns)]*x[i/n_columns];
+    		x[i/n_columns] = temp;
+    	}
+    }
+
+    printf("X=[\n");
+    for(i=0;i<n_lines;i++) {
+        printf("    %f\n", x[i]);
     }
     printf("]\n");
 
@@ -170,14 +220,24 @@ int main(int argc, char **argv) {
 
 	// write the correspondent point in y and the z values
 	current_point = DOMAIN_START_Y;
+
 	for(i=0;i<ny+1;i++) {
+		fprintf(fp, " %f", current_point);
+		for(j=0;j<nx+1;j++) {
+			fprintf(fp, " %lf", x[(i*(nx+1))+j]);
+		}
+		fprintf(fp, "\n");
+		current_point += hy;
+	}
+
+	/*for(i=0;i<ny+1;i++) {
 		fprintf(fp, " %f", current_point);
 		for(j=0;j<nx+1;j++) {
 			fprintf(fp, " 0.0");
 		}
 		fprintf(fp, "\n");
 		current_point += hy;
-	}
+	}*/
 
 	
 	fclose(fp);

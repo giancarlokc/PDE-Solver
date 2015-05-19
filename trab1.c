@@ -129,20 +129,27 @@ int main(int argc, char **argv) {
     
 
     double Fxy;
+    double ssh;
     // Set initial values
     for(i=0;i<n_lines*n_columns;i+=n_columns){
-    	Fxy = (4*M_PI*M_PI) * sin(2*M_PI*floor((i/n_columns)/3)*hx) * sinh(2*M_PI*((i/n_columns)%3)*hy);
+    	ssh = sin(2*M_PI*floor((i/n_columns)/(nx+1))*hx) * sinh(2*M_PI*((i/n_columns)%(ny+1))*hy);
+    	printf("Fxy = %lf * %lf\n", (4*M_PI*M_PI), ssh);
+    	Fxy = (4*M_PI*M_PI) * ssh;
     	#if DEBUG
-	        printf("F(%ld) = %lf\n", i/n_columns, Fxy);
+	        //printf("F(%ld) = %lf\n", i/n_columns, Fxy);
 	    #endif
         for(j=0;j<n_columns;j++) {
             if(i/n_columns == j) {
                 // IF the point is an edge, mark the related B position with a zero ELSE mark it with a 1 (TODO: put the real value)
-                if(   ( ((i/n_columns)+(ny+1)) / (ny+1) == 1) 
-                   || ( ((i/n_columns)+(ny+1)) / (ny+1) == nx+1) 
-                   || (j % (ny+1)) == 0
-                   || (j % (ny+1)) == ny ) {
-                    matB[i/n_columns] = Fxy;
+                if ( ((i/n_columns)%(ny+1))*hy == 1 )  {
+                	//printf("%lf\n", ((i/n_columns)%(ny+1))*hy);
+                	matB[i/n_columns] = ssh;
+                } else if (    floor((i/n_columns)/(nx+1))*hx == 2
+                			|| floor((i/n_columns)/(nx+1))*hx == 0
+                			|| ((i/n_columns)%(ny+1))*hy == 0 ) {
+                	//printf("Arroz: %lf\n", Fxy);
+                	matB[i/n_columns] = 0;
+                    //matB[i/n_columns] = Fxy;
                 } else {
                     // Put 3 on the variations of x (TODO: put the real values)
                     mat[i + j - (nx+1)] = deltax;
@@ -160,7 +167,7 @@ int main(int argc, char **argv) {
     }
     
     // Print the data
-    printf("A= [\n");
+    /*printf("A= [\n");
     for(i=0;i<n_lines*n_columns;i+=n_columns){
         printf("    ");
         for(j=0;j<n_columns;j++) {
@@ -172,25 +179,40 @@ int main(int argc, char **argv) {
         }
         printf("\n");
     }
-    printf("]\n");
+    printf("]\n");*/
     printf("B=[\n");
     for(i=0;i<n_lines;i++) {
         printf("    %f\n", matB[i]);
     }
     printf("]\n");
 
+    // GAUSS SEIDEL
+
     double soma;
     double temp;
     long k;
+	
     for (k=0; k<n_iterations; ++k) {
     	for(i=0;i<n_lines*n_columns;i+=n_columns) {
+    		//printf("Temp: ");
+
     		temp = matB[i/n_columns];
+
     		for (j=0; j<n_columns; ++j) {
     			temp -= mat[i+j]*x[j];
+    			//printf("%lf ", temp);
     		}
     		temp += mat[i+(i/n_columns)]*x[i/n_columns];
     		x[i/n_columns] = temp;
+
+    		//printf("\n");
+
     	}
+    	/*printf("%ld - X=[\n", k);
+	    for(i=0;i<n_lines;i++) {
+	        printf("    %f\n", x[i]);
+	    }
+	    printf("]\n");*/
     }
 
     printf("X=[\n");
@@ -221,10 +243,10 @@ int main(int argc, char **argv) {
 	// write the correspondent point in y and the z values
 	current_point = DOMAIN_START_Y;
 
-	for(i=0;i<ny+1;i++) {
+	for(i=0;i<nx+1;i++) {
 		fprintf(fp, " %f", current_point);
-		for(j=0;j<nx+1;j++) {
-			fprintf(fp, " %lf", x[(i*(nx+1))+j]);
+		for(j=0;j<ny+1;j++) {
+			fprintf(fp, " %lf", x[(j*(ny+1))+i]);
 		}
 		fprintf(fp, "\n");
 		current_point += hy;

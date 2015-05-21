@@ -21,7 +21,7 @@
 #define DOMAIN_LENGTH_Y 1.0
 
 #define GAUSS_SIDEL_METHOD 1
-#define OVER_RELAXATION_METHOD 2
+#define OVER_RELAXATION_METHOD 2	
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -93,6 +93,11 @@ int main(int argc, char **argv) {
 		i+=2;
 	}
 
+	if (nx*ny > 125*125) {
+		fprintf(stderr, "Os valores de nx e ny estão acima do permitido. Tente valores menores.\n");
+		return 1;
+	}
+
 	// ------------------------------------------------------- PROCESSING
     
     // Calculate hx and hy
@@ -134,7 +139,7 @@ int main(int argc, char **argv) {
     for(i=0;i<n_lines*n_columns;i+=n_columns){
     	ssh = sin(2*M_PI*floor((i/n_columns)/(nx+1))*hx) * sinh(2*M_PI*((i/n_columns)%(ny+1))*hy);
     	printf("Fxy = %lf * %lf\n", (4*M_PI*M_PI), ssh);
-    	Fxy = (4*M_PI*M_PI) * ssh;
+    	Fxy = ((4*M_PI*M_PI) * ssh)/delta;
     	#if DEBUG
 	        //printf("F(%ld) = %lf\n", i/n_columns, Fxy);
 	    #endif
@@ -179,12 +184,12 @@ int main(int argc, char **argv) {
         }
         printf("\n");
     }
-    printf("]\n");*/
+    printf("]\n");
     printf("B=[\n");
     for(i=0;i<n_lines;i++) {
         printf("    %f\n", matB[i]);
     }
-    printf("]\n");
+    printf("]\n");*/
 
     // GAUSS SEIDEL
 
@@ -215,11 +220,11 @@ int main(int argc, char **argv) {
 	    printf("]\n");*/
     }
 
-    printf("X=[\n");
+    /*printf("X=[\n");
     for(i=0;i<n_lines;i++) {
         printf("    %f\n", x[i]);
     }
-    printf("]\n");
+    printf("]\n");*/
 
 	// ------------------------------------------------------- OUTPUT
 	

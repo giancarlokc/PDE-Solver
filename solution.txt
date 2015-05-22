@@ -1,0 +1,16 @@
+###########
+# Tempo Método GS: 0.000108
+# Tempo Resíduo: 0.000104
+#
+# Norma do Resíduo
+# i=1: 210.007820
+# i=2: 80.295092
+# i=3: 34.953396
+# i=4: 17.060514
+# i=5: 8.899509
+###########
+set title "3D surface from a grid (matrix) of Z values"
+set xrange [ 0.0 : 2.0 ]
+set yrange [ 0.0 : 1.0 ]
+set ticslevel 0
+splot "out.data" matrix nonuniform with lines t ''

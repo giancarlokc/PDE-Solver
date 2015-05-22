@@ -32,6 +32,13 @@
 #define M_PI 3.14159265358979323846
 #endif
 
+// Time measure function
+double timestamp(void){
+    struct timeval tp;
+    gettimeofday(&tp, NULL);
+    return((double)(tp.tv_sec + tp.tv_usec/1000000.0));
+}
+
 int main(int argc, char **argv) {
 
 	// ------------------------------------------------------- INPUT
@@ -47,7 +54,7 @@ int main(int argc, char **argv) {
 
 	// Parameters
 	long nx, ny, n_iterations;
-	int method;
+	int method = GAUSS_SIDEL_METHOD;
 	char* output_file;
     output_file = (char*) malloc(sizeof(char) * 100);
     strcpy(output_file, "solution.txt");
@@ -103,6 +110,9 @@ int main(int argc, char **argv) {
     long n_columns = (nx+1)*(ny+1);
     double Fxy;
     double ssh;
+    double gs_time = 0;
+    double sor_time = 0;
+    double residue_time = 0;
 
     // Calculate hx and hy
     double hx = DOMAIN_LENGTH_X / nx;
@@ -125,7 +135,8 @@ int main(int argc, char **argv) {
     double *A = (double *) malloc(n_lines*n_columns*sizeof(double));
     double *B = (double*) malloc(n_lines*sizeof(double));
     double *x = (double*) malloc(n_lines*sizeof(double));
-    double *residue = (double *) malloc(n_lines*n_columns*sizeof(double));
+    double *residue = (double *) malloc(n_lines*sizeof(double));
+    double *normVector = (double *) malloc(n_iterations*sizeof(double));
     
     #if DEBUG
         printf("Vector instanciated with %ld positions.\n", n_lines*n_columns);
@@ -192,30 +203,34 @@ int main(int argc, char **argv) {
 
     // GAUSS SEIDEL
 
-    // Write the configuration file for the plot
-    FILE *fp;
-    fp = fopen(output_file, "w+");
-    if(fp == NULL) {
-        printf("Can't create/open file %s\n", output_file);
-        return -1;
-    }
-
     double soma;
     double temp;
     long k;
-	
-    for (k=0; k<n_iterations; ++k) {
-        // Start gs method
-    	for(i=0;i<n_lines*n_columns;i+=n_columns) {
+    double initial_time;
 
-    		temp = B[i/n_columns];
-    		for (j=0; j<n_columns; ++j) {
-    			temp -= A[i+j]*x[j];
-    			//printf("%lf ", temp);
-    		}
-    		temp += A[i+(i/n_columns)]*x[i/n_columns];
-    		x[i/n_columns] = temp;
-    	}
+    for (k=0; k<n_iterations; ++k) {
+
+        if(method == GAUSS_SIDEL_METHOD) {
+            initial_time = timestamp();
+
+            // Start gs method
+        	for(i=0;i<n_lines*n_columns;i+=n_columns) {
+
+        		temp = B[i/n_columns];
+        		for (j=0; j<n_columns; ++j) {
+        			temp -= A[i+j]*x[j];
+        		}
+        		temp += A[i+(i/n_columns)]*x[i/n_columns];
+        		x[i/n_columns] = temp;
+        	}
+
+            gs_time += timestamp() - initial_time;
+        } else {
+            fprintf(stderr, "SOR method was not implemented\n");
+            return 1;
+        }
+
+        initial_time = timestamp();
 
         // Calculate the residue norm L2
         double norm = 0;
@@ -235,10 +250,39 @@ int main(int argc, char **argv) {
         #if DEBUG
             printf("Norm for iteration %d: %.15lf\n", k, norm);
         #endif
-        fprintf(fp, "# i=%ld: %lf\n", k, norm);
+        normVector[k] = norm;
+
+        residue_time += timestamp() - initial_time;
     }
 
 	// ------------------------------------------------------- OUTPUT
+
+    // Write the configuration file for the plot
+    FILE *fp;
+    fp = fopen(output_file, "w+");
+    if(fp == NULL) {
+        printf("Can't create/open file %s\n", output_file);
+        return -1;
+    }
+
+    fprintf(fp, "###########\n");
+    // Write mean of iterations for each method
+    if(method == GAUSS_SIDEL_METHOD) {
+        fprintf(fp, "# Tempo Método GS: %lf\n", gs_time/n_iterations);
+    } else if(method == OVER_RELAXATION_METHOD) {
+        fprintf(fp, "# Tempo Método SOR: %lf\n", gs_time/n_iterations);
+    }
+
+    // Write mean for calculating the residue
+    fprintf(fp, "# Tempo Resíduo: %lf\n", residue_time/n_iterations);
+
+    fprintf(fp, "#\n# Norma do Resíduo\n");
+
+    // Write norms
+    for(i=0;i<n_iterations;++i) {
+        fprintf(fp, "# i=%ld: %lf\n", i+1, normVector[i]);
+    }
+    fprintf(fp, "###########\n");
 
     // write gnuplot configuration
     fprintf(fp, "set title \"3D surface from a grid (matrix) of Z values\"\n");

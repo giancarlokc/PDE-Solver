@@ -2,13 +2,13 @@
 
 // Output file:
 //  Hx x1	x2	. . .	xn
-//  y1 z11	z12 . . .	z1n			
-//  y2 z21	z22 . . .	z2n
-//  y3 z31	z32 . . .	z3n
+//  y1 z11	z12 . . .	zn1			
+//  y2 z21	z22 . . .	zn2
+//  y3 z31	z32 . . .	zn3
 //  .  	.	 .  .
 //  .	.	 .	  .
 //  .	.    .		.
-//  yn zn1  zn2      	znn 
+//  ym z1m  z2m      	znm 
 
 // F(x) = 4*(PI)^2 * sin(2*PI*x) * sinh(2*PI*y)
 // Domain: x = [0,2] , y = [0,1]
@@ -31,15 +31,6 @@
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
-
-int error(char* error_mesg, int line) {
-    printf("ERROR: %s", error_mesg);
-    if(DEBUG) {
-        printf(" (AT LINE %d)", line);
-    }
-    printf("\n");
-    return -1;
-}
 
 int main(int argc, char **argv) {
 
@@ -93,103 +84,104 @@ int main(int argc, char **argv) {
 		i+=2;
 	}
 
+    // Error message in case of values out of range
 	if (nx*ny > 125*125) {
 		fprintf(stderr, "Os valores de nx e ny estão acima do permitido. Tente valores menores.\n");
 		return 1;
 	}
 
 	// ------------------------------------------------------- PROCESSING
-    
+
+    // General variables
+    long n_lines = (nx+1)*(ny+1);
+    long n_columns = (nx+1)*(ny+1);
+    double Fxy;
+    double ssh;
+
     // Calculate hx and hy
     double hx = DOMAIN_LENGTH_X / nx;
     double hy = DOMAIN_LENGTH_Y / ny;
-    #if DEBUG
-        printf("HX = %f\n", hx);
-        printf("HY = %f\n", hy);
-    #endif
-    
+
+    // Calculate DELTA, deltaX and deltaY
     double delta = (2/(hx*hx)) + (2/(hy*hy)) + (4*M_PI*M_PI);
-
-    #if DEBUG
-    	printf("Delta = %lf\n", delta);
-    #endif
-
     double deltax = (-1/(hx*hx))/delta;
     double deltay = (-1/(hy*hy))/delta;
 
     #if DEBUG
+        printf("HX = %f\n", hx);
+        printf("HY = %f\n", hy);
+    	printf("Delta = %lf\n", delta);
     	printf("Delta X = %lf\n", deltax);
     	printf("Delta Y = %lf\n", deltay);
     #endif
 
-    // Alloc the memory
-    long n_lines = (nx+1)*(ny+1);
-    long n_columns = (nx+1)*(ny+1); 
-    double *mat = (double *) malloc(n_lines*n_columns*sizeof(double));
-    double *matB = (double*) malloc(n_lines*sizeof(double));
+    // Alloc the memory for the equation (Ax = B)
+    double *A = (double *) malloc(n_lines*n_columns*sizeof(double));
+    double *B = (double*) malloc(n_lines*sizeof(double));
     double *x = (double*) malloc(n_lines*sizeof(double));
+    
     #if DEBUG
         printf("Vector instanciated with %ld positions.\n", n_lines*n_columns);
     #endif
-    
 
-    double Fxy;
-    double ssh;
-    // Set initial values
+    // Set initial values for the matrix A and vector B
     for(i=0;i<n_lines*n_columns;i+=n_columns){
     	ssh = sin(2*M_PI*floor((i/n_columns)/(nx+1))*hx) * sinh(2*M_PI*((i/n_columns)%(ny+1))*hy);
-    	printf("Fxy = %lf * %lf\n", (4*M_PI*M_PI), ssh);
     	Fxy = ((4*M_PI*M_PI) * ssh)/delta;
+
     	#if DEBUG
-	        //printf("F(%ld) = %lf\n", i/n_columns, Fxy);
+            printf("Fxy = %lf * %lf\n", (4*M_PI*M_PI), ssh);
 	    #endif
+
+        // Iterate positions of A
         for(j=0;j<n_columns;j++) {
             if(i/n_columns == j) {
-                // IF the point is an edge, mark the related B position with a zero ELSE mark it with a 1 (TODO: put the real value)
-                if ( ((i/n_columns)%(ny+1))*hy == 1 )  {
-                	//printf("%lf\n", ((i/n_columns)%(ny+1))*hy);
-                	matB[i/n_columns] = ssh;
-                } else if (    floor((i/n_columns)/(nx+1))*hx == 2
-                			|| floor((i/n_columns)/(nx+1))*hx == 0
-                			|| ((i/n_columns)%(ny+1))*hy == 0 ) {
-                	//printf("Arroz: %lf\n", Fxy);
-                	matB[i/n_columns] = 0;
-                    //matB[i/n_columns] = Fxy;
+                // IF the position is the edge where y = 1, set related B position with value `ssh`
+                if ( ((i/n_columns)%(ny+1))*hy == DOMAIN_LENGTH_Y )  {
+                	B[i/n_columns] = ssh;
+                // IF the position is the edge where y = 0, x = 0 or x = 2, set related B position with value `0`
+                } else if (    floor((i/n_columns)/(nx+1))*hx == DOMAIN_LENGTH_X
+                			|| floor((i/n_columns)/(nx+1))*hx == DOMAIN_START_X
+                			|| ((i/n_columns)%(ny+1))*hy == DOMAIN_START_Y ) {
+                	B[i/n_columns] = 0;
+                // If the point is not an edge, set the matrix A line and the related B position
                 } else {
-                    // Put 3 on the variations of x (TODO: put the real values)
-                    mat[i + j - (nx+1)] = deltax;
-                    mat[i + j + (nx+1)] = deltax;
-                    // Put 4 on the variations of y (TODO: put the real values)
-                    mat[i + j - 1] = deltay;
-                    mat[i + j + 1] = deltay;
-                    matB[i/n_columns] = Fxy;
+                    // Put deltax on the variations of x
+                    A[i + j - (nx+1)] = deltax;
+                    A[i + j + (nx+1)] = deltax;
+                    // Put deltay on the variations of y
+                    A[i + j - 1] = deltay;
+                    A[i + j + 1] = deltay;
+                    // Put the related Fxy for this point
+                    B[i/n_columns] = Fxy;
                 }
-                mat[i + j] = 1;
-            } else {
-                
+                // Set matrix A diagonal with values `1`
+                A[i + j] = 1;
             }
         }
     }
     
-    // Print the data
-    /*printf("A= [\n");
-    for(i=0;i<n_lines*n_columns;i+=n_columns){
-        printf("    ");
-        for(j=0;j<n_columns;j++) {
-            if(mat[i + j] == 0) {
-                printf("    --     ");
-            } else {
-                printf("%10f ", mat[i + j]);
+    #if DEBUG
+        // Print the data
+        printf("A= [\n");
+        for(i=0;i<n_lines*n_columns;i+=n_columns){
+            printf("    ");
+            for(j=0;j<n_columns;j++) {
+                if(A[i + j] == 0) {
+                    printf("    --     ");
+                } else {
+                    printf("%10f ", A[i + j]);
+                }
             }
+            printf("\n");
         }
-        printf("\n");
-    }
-    printf("]\n");
-    printf("B=[\n");
-    for(i=0;i<n_lines;i++) {
-        printf("    %f\n", matB[i]);
-    }
-    printf("]\n");*/
+        printf("]\n");
+        printf("B=[\n");
+        for(i=0;i<n_lines;i++) {
+            printf("    %f\n", B[i]);
+        }
+        printf("]\n");
+    #endif
 
     // GAUSS SEIDEL
 
@@ -199,32 +191,16 @@ int main(int argc, char **argv) {
 	
     for (k=0; k<n_iterations; ++k) {
     	for(i=0;i<n_lines*n_columns;i+=n_columns) {
-    		//printf("Temp: ");
 
-    		temp = matB[i/n_columns];
-
+    		temp = B[i/n_columns];
     		for (j=0; j<n_columns; ++j) {
-    			temp -= mat[i+j]*x[j];
+    			temp -= A[i+j]*x[j];
     			//printf("%lf ", temp);
     		}
-    		temp += mat[i+(i/n_columns)]*x[i/n_columns];
+    		temp += A[i+(i/n_columns)]*x[i/n_columns];
     		x[i/n_columns] = temp;
-
-    		//printf("\n");
-
     	}
-    	/*printf("%ld - X=[\n", k);
-	    for(i=0;i<n_lines;i++) {
-	        printf("    %f\n", x[i]);
-	    }
-	    printf("]\n");*/
     }
-
-    /*printf("X=[\n");
-    for(i=0;i<n_lines;i++) {
-        printf("    %f\n", x[i]);
-    }
-    printf("]\n");*/
 
 	// ------------------------------------------------------- OUTPUT
 	
@@ -245,45 +221,20 @@ int main(int argc, char **argv) {
 	}
 	fprintf(fp, "\n");
 
-	// write the correspondent point in y and the z values
+	// write the points in y
 	current_point = DOMAIN_START_Y;
-
 	for(i=0;i<ny+1;i++) {
 		fprintf(fp, " %f", current_point);
+
+        // Write the correspondent z points
 		for(j=0;j<nx+1;j++) {
 			fprintf(fp, " %lf", x[(j*(ny+1))+i]);
 		}
+
 		fprintf(fp, "\n");
 		current_point += hy;
 	}
-
-	/*for(i=0;i<ny+1;i++) {
-		fprintf(fp, " %f", current_point);
-		for(j=0;j<nx+1;j++) {
-			fprintf(fp, " 0.0");
-		}
-		fprintf(fp, "\n");
-		current_point += hy;
-	}*/
-
 	
+    // Save and close file
 	fclose(fp);
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }

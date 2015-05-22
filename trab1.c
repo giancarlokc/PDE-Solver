@@ -235,7 +235,7 @@ int main(int argc, char **argv) {
         #if DEBUG
             printf("Norm for iteration %d: %.15lf\n", k, norm);
         #endif
-        fprintf(fp, "# Iteration %ld norm: %lf\n", k, norm);
+        fprintf(fp, "# i=%ld: %lf\n", k, norm);
     }
 
 	// ------------------------------------------------------- OUTPUT

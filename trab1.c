@@ -248,9 +248,9 @@ int main(int argc, char **argv) {
 	// write the correspondent point in y and the z values
 	current_point = DOMAIN_START_Y;
 
-	for(i=0;i<nx+1;i++) {
+	for(i=0;i<ny+1;i++) {
 		fprintf(fp, " %f", current_point);
-		for(j=0;j<ny+1;j++) {
+		for(j=0;j<nx+1;j++) {
 			fprintf(fp, " %lf", x[(j*(ny+1))+i]);
 		}
 		fprintf(fp, "\n");

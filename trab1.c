@@ -13,7 +13,7 @@
 // F(x) = 4*(PI)^2 * sin(2*PI*x) * sinh(2*PI*y)
 // Domain: x = [0,2] , y = [0,1]
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define DOMAIN_START_X 0.0
 #define DOMAIN_LENGTH_X 2.0
@@ -192,6 +192,14 @@ int main(int argc, char **argv) {
 
     // GAUSS SEIDEL
 
+    // Write the configuration file for the plot
+    FILE *fp;
+    fp = fopen(output_file, "w+");
+    if(fp == NULL) {
+        printf("Can't create/open file %s\n", output_file);
+        return -1;
+    }
+
     double soma;
     double temp;
     long k;
@@ -227,18 +235,10 @@ int main(int argc, char **argv) {
         #if DEBUG
             printf("Norm for iteration %d: %.15lf\n", k, norm);
         #endif
-
+        fprintf(fp, "# Iteration %ld norm: %lf\n", k, norm);
     }
 
 	// ------------------------------------------------------- OUTPUT
-	
-    // Write the output file matrix for the plot
-    FILE *fp;
-    fp = fopen(output_file, "w+");
-    if(fp == NULL) {
-        printf("Can't create/open file %s\n", output_file);
-        return -1;
-    }
 
     // write gnuplot configuration
     fprintf(fp, "set title \"3D surface from a grid (matrix) of Z values\"\n");

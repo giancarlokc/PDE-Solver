@@ -10,4 +10,4 @@ $(PROG):  $(OBJS)
 	$(CC) -o $@ $^ $(LIB)
 
 clean:
-	@rm -f *~ *.bak *.o $(PROG)
+	@rm -f *~ *.bak *.o $(PROG) out.data solution.txt

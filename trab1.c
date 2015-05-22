@@ -49,6 +49,8 @@ int main(int argc, char **argv) {
 	long nx, ny, n_iterations;
 	int method;
 	char* output_file;
+    output_file = (char*) malloc(sizeof(char) * 100);
+    strcpy(output_file, "out.data");
 	n_iterations = 5;
 
 	// Read parameters

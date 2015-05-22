@@ -6,24 +6,15 @@ Compile:
     
 Run:
 
-    trab1 [Discretization of x] [Discretization de y] [Number of iterations]
+    pdeSolver [OPTION] [OPTION_VALUE]
+
+    Options:
+    	-nx: Discretization of x (REQUIRED)
+    	-ny: Discretization of y (REQUIRED)
+    	-i: Number of iterations (5 [DEFAULT])
+    	-o: Output file path ('out.data' [DEFAULT])
+    	-m: Solving method ('gs'[DEFAULT] or 'sor')
     
 Generate plot:
-
-    gnuplot -persist solution.txt
-    
-#########################################################################
-
-Trabalho ICC - UFPR 2015
-
-Para compilar:
-
-    make
-    
-Para executar:
-
-    trab1 [Discretização de x] [Discretização de y] [Número de iterações]
-    
-Para ver o plot:
 
     gnuplot -persist solution.txt

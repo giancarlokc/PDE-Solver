@@ -50,7 +50,7 @@ int main(int argc, char **argv) {
 	int method;
 	char* output_file;
     output_file = (char*) malloc(sizeof(char) * 100);
-    strcpy(output_file, "out.data");
+    strcpy(output_file, "solution.txt");
 	n_iterations = 5;
 
 	// Read parameters
@@ -121,10 +121,11 @@ int main(int argc, char **argv) {
     	printf("Delta Y = %lf\n", deltay);
     #endif
 
-    // Alloc the memory for the equation (Ax = B)
+    // Alloc the memory for the equation (Ax = B) and for the residue
     double *A = (double *) malloc(n_lines*n_columns*sizeof(double));
     double *B = (double*) malloc(n_lines*sizeof(double));
     double *x = (double*) malloc(n_lines*sizeof(double));
+    double *residue = (double *) malloc(n_lines*n_columns*sizeof(double));
     
     #if DEBUG
         printf("Vector instanciated with %ld positions.\n", n_lines*n_columns);
@@ -196,6 +197,7 @@ int main(int argc, char **argv) {
     long k;
 	
     for (k=0; k<n_iterations; ++k) {
+        // Start gs method
     	for(i=0;i<n_lines*n_columns;i+=n_columns) {
 
     		temp = B[i/n_columns];
@@ -206,13 +208,50 @@ int main(int argc, char **argv) {
     		temp += A[i+(i/n_columns)]*x[i/n_columns];
     		x[i/n_columns] = temp;
     	}
+
+        // Calculate the residue norm L2
+        double norm = 0;
+        // Calculate A*x
+        for(i=0;i<n_lines*n_columns;i+=n_columns) {
+            double sum = 0;
+            for (j=0; j<n_columns; ++j) {
+                sum += A[i + j]*x[j];
+            }
+            residue[i/n_columns] = sum;
+        }
+        // Calculate norm L2 = ||B - Ax||2
+        for(i=0;i<n_lines;++i) {
+            norm += (residue[i] - B[i])*(residue[i] - B[i]);
+        }
+        norm = sqrt(norm);
+        #if DEBUG
+            printf("Norm for iteration %d: %.15lf\n", k, norm);
+        #endif
+
     }
 
 	// ------------------------------------------------------- OUTPUT
 	
+    // Write the output file matrix for the plot
+    FILE *fp;
+    fp = fopen(output_file, "w+");
+    if(fp == NULL) {
+        printf("Can't create/open file %s\n", output_file);
+        return -1;
+    }
+
+    // write gnuplot configuration
+    fprintf(fp, "set title \"3D surface from a grid (matrix) of Z values\"\n");
+    fprintf(fp, "set xrange [ 0.0 : 2.0 ]\n");
+    fprintf(fp, "set yrange [ 0.0 : 1.0 ]\n");
+    fprintf(fp, "set ticslevel 0\n");
+    fprintf(fp, "splot \"out.data\" matrix nonuniform with lines t ''\n");
+
+    // Save and close file
+    fclose(fp);
+
 	// Write the 'out.data' matrix for the plot
-	FILE *fp;
-	fp = fopen(output_file, "w+");
+	fp = fopen("out.data", "w+");
 	if(fp == NULL) {
 		printf("Can't create/open file %s\n", output_file);
 		return -1;

@@ -73,6 +73,10 @@ int main(int argc, char **argv) {
 					return -1;
 				}
 			} else if(!strcmp(argv[i], "-o")) {
+                if(strlen(argv[i+1]) > 98) {
+                    printf("Output path too long (MAX_LENGTH=100)\n");
+                    return -1;
+                }
 				output_file = argv[i+1];
 			} else {
 				printf("Unkown parameter: %s\n", argv[i]);

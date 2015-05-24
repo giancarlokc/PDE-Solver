@@ -1,0 +1,51 @@
+LEIA-ME
+
+1. Introdução:
+
+Trabalho de CI164 - Introdução à Computação Científica
+Feito por:
+Giancarlo Klemm Camilo		- GRR2011
+Renan Domingos Merlin Greca	- GRR20114506
+
+2. Lista de arquivos:
+	
+	LEIAME
+		Este arquivo.
+
+	Makefile
+		Arquivo make para a compilação do programa.
+
+	trab1.c
+		Código-fonte do programa.
+
+	.git, .gitignore e README
+		Arquivos auxiliares para o controle de versão.
+
+3. Utilização:
+
+	Compilar:
+
+    	make
+    
+	Executar:
+
+	    pdeSolver [OPÇÃO] [VALOR_OPÇÃO]
+
+	    Opções:
+	    	-nx: Discretização de x (OBRIGATÓRIO)
+	    	-ny: Discretização de y (OBRIGATÓRIO)
+	    	-i: Número de iterações (5 [PADRÃO])
+	    	-o: Caminho do arquivo de saída ('out.data' [PADRÃO])
+	    	-m: Método de resolução ('gs'[PADRÃO] or 'sor')
+    
+	Gerar gráfico:
+
+		gnuplot -persist solution.txt
+
+4. Algoritmos e estruturas de dados usados:
+
+	TODO COMPLETAR ESTA PARTE
+
+5. Bugs conhecidos:
+
+	Ao utilizar "make all" ao invés de "make", um erro é exibido. Contudo, o executável gerado parece funcionar como esperado. 

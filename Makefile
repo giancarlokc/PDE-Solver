@@ -11,3 +11,6 @@ $(PROG):  $(OBJS)
 
 clean:
 	@rm -f *~ *.bak *.o $(PROG) out.data solution.txt
+
+all: $(PROG)
+	$(CC) -o $@ $^ $(LIB)

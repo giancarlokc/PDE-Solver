@@ -158,8 +158,8 @@ int main(int argc, char **argv) {
                 if ( ((i/n_columns)%(ny+1))*hy == DOMAIN_LENGTH_Y )  {
                 	B[i/n_columns] = ssh;
                 // IF the position is the edge where y = 0, x = 0 or x = 2, set related B position with value `0`
-                } else if (    floor((i/n_columns)/(nx+1))*hx == DOMAIN_LENGTH_X
-                			|| floor((i/n_columns)/(nx+1))*hx == DOMAIN_START_X
+                } else if (    floor((i/n_columns)/(ny+1))*hx == DOMAIN_LENGTH_X
+                			|| floor((i/n_columns)/(ny+1))*hx == DOMAIN_START_X
                 			|| ((i/n_columns)%(ny+1))*hy == DOMAIN_START_Y ) {
                 	B[i/n_columns] = 0;
                 // If the point is not an edge, set the matrix A line and the related B position

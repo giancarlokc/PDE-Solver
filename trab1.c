@@ -13,7 +13,7 @@
 // F(x) = 4*(PI)^2 * sin(2*PI*x) * sinh(2*PI*y)
 // Domain: x = [0,2] , y = [0,1]
 
-#define DEBUG 0
+#define DEBUG 1
 
 #define DOMAIN_START_X 0.0
 #define DOMAIN_LENGTH_X 2.0
@@ -22,6 +22,8 @@
 
 #define GAUSS_SIDEL_METHOD 1
 #define OVER_RELAXATION_METHOD 2	
+
+#define ERROR 0.05
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,6 +39,15 @@ double timestamp(void){
     struct timeval tp;
     gettimeofday(&tp, NULL);
     return((double)(tp.tv_sec + tp.tv_usec/1000000.0));
+}
+
+int compare(double a, double b) {
+	printf("Comparing %lf with %lf\n", a, b);
+	if(a >= (b - b*ERROR) && a <= (b + b*ERROR)) {
+		return 1;
+	} else {
+		return 0;
+	}
 }
 
 int main(int argc, char **argv) {
@@ -107,7 +118,7 @@ int main(int argc, char **argv) {
 
     // General variables
     long n_lines = (nx+1)*(ny+1);
-    long n_columns = (nx+1)*(ny+1);
+    long n_columns = (2*(ny+1) + 1);
     double Fxy;
     double ssh;
     double gs_time = 0;
@@ -144,6 +155,7 @@ int main(int argc, char **argv) {
 
     // Set initial values for the matrix A and vector B
     for(i=0;i<n_lines*n_columns;i+=n_columns){
+    	printf("Line %ld:    point:%ld\n", i, i/n_columns);
     	ssh = sin(2*M_PI*floor((i/n_columns)/(nx+1))*hx) * sinh(2*M_PI*((i/n_columns)%(ny+1))*hy);
     	Fxy = ((4*M_PI*M_PI) * ssh)/delta;
 
@@ -151,32 +163,29 @@ int main(int argc, char **argv) {
             printf("Fxy = %lf * %lf\n", (4*M_PI*M_PI), ssh);
 	    #endif
 
-        // Iterate positions of A
-        for(j=0;j<n_columns;j++) {
-            if(i/n_columns == j) {
-                // IF the position is the edge where y = 1, set related B position with value `ssh`
-                if ( ((i/n_columns)%(ny+1))*hy == DOMAIN_LENGTH_Y )  {
-                	B[i/n_columns] = ssh;
-                // IF the position is the edge where y = 0, x = 0 or x = 2, set related B position with value `0`
-                } else if (    floor((i/n_columns)/(nx+1))*hx == DOMAIN_LENGTH_X
-                			|| floor((i/n_columns)/(nx+1))*hx == DOMAIN_START_X
-                			|| ((i/n_columns)%(ny+1))*hy == DOMAIN_START_Y ) {
-                	B[i/n_columns] = 0;
-                // If the point is not an edge, set the matrix A line and the related B position
-                } else {
-                    // Put deltax on the variations of x
-                    A[i + j - (nx+1)] = deltax;
-                    A[i + j + (nx+1)] = deltax;
-                    // Put deltay on the variations of y
-                    A[i + j - 1] = deltay;
-                    A[i + j + 1] = deltay;
-                    // Put the related Fxy for this point
-                    B[i/n_columns] = Fxy;
-                }
-                // Set matrix A diagonal with values `1`
-                A[i + j] = 1;
-            }
+        
+        // IF the position is the edge where y = 1, set related B position with value `ssh`
+        if ( ((i/n_columns)%(ny+1))*hy == DOMAIN_LENGTH_Y )  {
+        	B[i/n_columns] = ssh;
+        // IF the position is the edge where y = 0, x = 0 or x = 2, set related B position with value `0`
+        } else if (floor((i/n_columns)/(ny+1))*hx == DOMAIN_LENGTH_X) {
+        	B[i/n_columns] = 0;
+        } else if (floor((i/n_columns)/(ny+1))*hx == DOMAIN_START_X
+        			|| ((i/n_columns)%(ny+1))*hy == DOMAIN_START_Y ) {
+        	B[i/n_columns] = 0;
+        // If the point is not an edge, set the matrix A line and the related B position
+        } else {
+            // Put deltax on the variations of x
+            A[i + (ny+1) - (ny+1)] = deltax;
+            A[i + (ny+1) + (ny+1)] = deltax;
+            // Put deltay on the variations of y
+            A[i + (ny+1) - 1] = deltay;
+            A[i + (ny+1) + 1] = deltay;
+            // Put the related Fxy for this point
+            B[i/n_columns] = Fxy;
         }
+        // Set matrix A diagonal with values `1`
+        A[i + (ny+1)] = 1;
     }
     
     #if DEBUG
@@ -215,12 +224,26 @@ int main(int argc, char **argv) {
 
             // Start gs method
         	for(i=0;i<n_lines*n_columns;i+=n_columns) {
-
         		temp = B[i/n_columns];
-        		for (j=0; j<n_columns; ++j) {
-        			temp -= A[i+j]*x[j];
-        		}
-        		temp += A[i+(i/n_columns)]*x[i/n_columns];
+
+                long middle = i/n_columns;
+                long x_down = i/n_columns - (ny+1);
+                long x_up = i/n_columns + (ny+1);
+                long y_down = i/n_columns - 1;
+                long y_up = i/n_columns + 1;
+                if(x_down > 0) {
+                    temp -= A[i + (ny+1) - (ny+1)]*x[x_down];
+                }
+                if(x_up < n_lines) {
+                    temp -= A[i + (ny+1) - (ny+1)]*x[x_up];
+                }
+                if(y_down > 0) {
+                    temp -= A[i + (ny+1) - 1]*x[y_down];
+                }
+                if(y_up < n_lines) {
+                    temp -= A[i + (ny+1) + 1]*x[y_up];
+                }
+
         		x[i/n_columns] = temp;
         	}
 
@@ -248,7 +271,7 @@ int main(int argc, char **argv) {
         }
         norm = sqrt(norm);
         #if DEBUG
-            printf("Norm for iteration %d: %.15lf\n", k, norm);
+            printf("Norm for iteration %ld: %.15lf\n", k, norm);
         #endif
         normVector[k] = norm;
 

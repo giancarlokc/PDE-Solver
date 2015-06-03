@@ -13,7 +13,7 @@
 // F(x) = 4*(PI)^2 * sin(2*PI*x) * sinh(2*PI*y)
 // Domain: x = [0,2] , y = [0,1]
 
-#define DEBUG 1
+#define DEBUG 0
 
 #define DOMAIN_START_X 0.0
 #define DOMAIN_LENGTH_X 2.0
@@ -109,7 +109,7 @@ int main(int argc, char **argv) {
 	}
 
     // Error message in case of values out of range
-	if (nx*ny > 125*125) {
+	if (nx*ny > 1000*1000) {
 		fprintf(stderr, "Os valores de nx e ny estão acima do permitido. Tente valores menores.\n");
 		return 1;
 	}
@@ -155,8 +155,8 @@ int main(int argc, char **argv) {
 
     // Set initial values for the matrix A and vector B
     for(i=0;i<n_lines*n_columns;i+=n_columns){
-    	printf("Line %ld:    point:%ld\n", i, i/n_columns);
-    	ssh = sin(2*M_PI*floor((i/n_columns)/(nx+1))*hx) * sinh(2*M_PI*((i/n_columns)%(ny+1))*hy);
+    	//printf("Line %ld:    point:%ld\n", i, i/n_columns);
+    	ssh = sin(2*M_PI*floor((i/n_columns)/(ny+1))*hx) * sinh(2*M_PI*((i/n_columns)%(ny+1))*hy);
     	Fxy = ((4*M_PI*M_PI) * ssh)/delta;
 
     	#if DEBUG

@@ -1,4 +1,4 @@
-    LIB = -lm
+    LIB = -lm -O2
     PROG = pdeSolver
     OBJS   = trab1.o
     CC     = gcc -g

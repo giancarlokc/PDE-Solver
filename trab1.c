@@ -1,14 +1,14 @@
 // UFPR - Iniciação a Computação Científica 2015
 
 // Output file:
-//  Hx x1	x2	. . .	xn
-//  y1 z11	z12 . . .	zn1			
-//  y2 z21	z22 . . .	zn2
-//  y3 z31	z32 . . .	zn3
-//  .  	.	 .  .
-//  .	.	 .	  .
-//  .	.    .		.
-//  ym z1m  z2m      	znm 
+//  Hx x1   x2  . . .   xn
+//  y1 z11  z12 . . .   zn1         
+//  y2 z21  z22 . . .   zn2
+//  y3 z31  z32 . . .   zn3
+//  .   .    .  .
+//  .   .    .    .
+//  .   .    .      .
+//  ym z1m  z2m         znm 
 
 // F(x) = 4*(PI)^2 * sin(2*PI*x) * sinh(2*PI*y)
 // Domain: x = [0,2] , y = [0,1]
@@ -21,7 +21,7 @@
 #define DOMAIN_LENGTH_Y 1.0
 
 #define GAUSS_SIDEL_METHOD 1
-#define OVER_RELAXATION_METHOD 2	
+#define OVER_RELAXATION_METHOD 2    
 
 #define ERROR 0.05
 
@@ -42,83 +42,83 @@ double timestamp(void){
 }
 
 int compare(double a, double b) {
-	printf("Comparing %lf with %lf\n", a, b);
-	if(a >= (b - b*ERROR) && a <= (b + b*ERROR)) {
-		return 1;
-	} else {
-		return 0;
-	}
+    printf("Comparing %lf with %lf\n", a, b);
+    if(a >= (b - b*ERROR) && a <= (b + b*ERROR)) {
+        return 1;
+    } else {
+        return 0;
+    }
 }
 
 int main(int argc, char **argv) {
 
-	// ------------------------------------------------------- INPUT
+    // ------------------------------------------------------- INPUT
 
     // Usage
     if(argc < 4) {
         printf("Usage: pdeSolver -nx <Nx> -ny <Ny> -i <maxIter> -m <gs | sor> -o arquivo_saida \n");
-		return -1;
+        return -1;
     }
 
-	// General variables
-	long i, j;
+    // General variables
+    long i, j;
 
-	// Parameters
-	long nx, ny, n_iterations;
-	int method = GAUSS_SIDEL_METHOD;
-	char* output_file;
+    // Parameters
+    long nx, ny, n_iterations;
+    int method = GAUSS_SIDEL_METHOD;
+    char* output_file;
     output_file = (char*) malloc(sizeof(char) * 100);
     strcpy(output_file, "solution.txt");
-	n_iterations = 5;
+    n_iterations = 5;
 
-	// Read parameters
-	i=1;
-	while(argc > i) {
-		if(argc > i+1) {
-			if(!strcmp(argv[i], "-nx")) {
-				nx = atol(argv[i+1]);
-			} else if(!strcmp(argv[i], "-ny")) {
-				ny = atol(argv[i+1]);
-			} else if(!strcmp(argv[i], "-i")) {
-				n_iterations = atol(argv[i+1]);
-			} else if(!strcmp(argv[i], "-m")) {
-				if(!strcmp(argv[i+1], "gs")){
-					method = GAUSS_SIDEL_METHOD;
-				} else if(!strcmp(argv[i+1], "sor")){
-					method = OVER_RELAXATION_METHOD;
-				} else {
-					printf("Invalid method: %s\n", argv[i+1]);
-					return -1;
-				}
-			} else if(!strcmp(argv[i], "-o")) {
+    // Read parameters
+    i=1;
+    while(argc > i) {
+        if(argc > i+1) {
+            if(!strcmp(argv[i], "-nx")) {
+                nx = atol(argv[i+1]);
+            } else if(!strcmp(argv[i], "-ny")) {
+                ny = atol(argv[i+1]);
+            } else if(!strcmp(argv[i], "-i")) {
+                n_iterations = atol(argv[i+1]);
+            } else if(!strcmp(argv[i], "-m")) {
+                if(!strcmp(argv[i+1], "gs")){
+                    method = GAUSS_SIDEL_METHOD;
+                } else if(!strcmp(argv[i+1], "sor")){
+                    method = OVER_RELAXATION_METHOD;
+                } else {
+                    printf("Invalid method: %s\n", argv[i+1]);
+                    return -1;
+                }
+            } else if(!strcmp(argv[i], "-o")) {
                 if(strlen(argv[i+1]) > 98) {
                     printf("Output path too long (MAX_LENGTH=100)\n");
                     return -1;
                 }
-				output_file = argv[i+1];
-			} else {
-				printf("Unkown parameter: %s\n", argv[i]);
-				return -1;
-			}
-		} else {
-			printf("Value for parameter '%s' was not defined\n", argv[i]);
-			return -1;
-		}
-		
-		i+=2;
-	}
+                output_file = argv[i+1];
+            } else {
+                printf("Unkown parameter: %s\n", argv[i]);
+                return -1;
+            }
+        } else {
+            printf("Value for parameter '%s' was not defined\n", argv[i]);
+            return -1;
+        }
+        
+        i+=2;
+    }
 
     // Error message in case of values out of range
-	if (nx*ny > 1000*1000) {
-		fprintf(stderr, "Os valores de nx e ny estão acima do permitido. Tente valores menores.\n");
-		return 1;
-	}
+    //if (nx*ny > 100000*100000) {
+    //  fprintf(stderr, "Os valores de nx e ny estão acima do permitido. Tente valores menores.\n");
+    //  return 1;
+    //}
 
-	// ------------------------------------------------------- PROCESSING
+    // ------------------------------------------------------- PROCESSING
 
     // General variables
     long n_lines = (nx+1)*(ny+1);
-    long n_columns = (2*(ny+1) + 1);
+    long n_columns = 1;
     double Fxy;
     double ssh;
     double gs_time = 0;
@@ -137,13 +137,13 @@ int main(int argc, char **argv) {
     #if DEBUG
         printf("HX = %f\n", hx);
         printf("HY = %f\n", hy);
-    	printf("Delta = %lf\n", delta);
-    	printf("Delta X = %lf\n", deltax);
-    	printf("Delta Y = %lf\n", deltay);
+        printf("Delta = %lf\n", delta);
+        printf("Delta X = %lf\n", deltax);
+        printf("Delta Y = %lf\n", deltay);
     #endif
 
     // Alloc the memory for the equation (Ax = B) and for the residue
-    double *A = (double *) malloc(n_lines*n_columns*sizeof(double));
+    short int *A = (short int *) malloc(n_lines*n_columns*sizeof(short int));
     double *B = (double*) malloc(n_lines*sizeof(double));
     double *x = (double*) malloc(n_lines*sizeof(double));
     double *residue = (double *) malloc(n_lines*sizeof(double));
@@ -154,38 +154,36 @@ int main(int argc, char **argv) {
     #endif
 
     // Set initial values for the matrix A and vector B
-    for(i=0;i<n_lines*n_columns;i+=n_columns){
-    	//printf("Line %ld:    point:%ld\n", i, i/n_columns);
-    	ssh = sin(2*M_PI*floor((i/n_columns)/(ny+1))*hx) * sinh(2*M_PI*((i/n_columns)%(ny+1))*hy);
-    	Fxy = ((4*M_PI*M_PI) * ssh)/delta;
+    for(i=0;i<n_lines;++i){
+        //printf("Line %ld:    point:%ld\n", i, i/n_columns);
+        ssh = sin(2*M_PI*floor(i/(ny+1))*hx) * sinh(2*M_PI*(i%(ny+1))*hy);
+        Fxy = ((4*M_PI*M_PI) * ssh)/delta;
 
-    	#if DEBUG
+        #if DEBUG
             printf("Fxy = %lf * %lf\n", (4*M_PI*M_PI), ssh);
-	    #endif
+        #endif
 
         
         // IF the position is the edge where y = 1, set related B position with value `ssh`
-        if ( ((i/n_columns)%(ny+1))*hy == DOMAIN_LENGTH_Y )  {
-        	B[i/n_columns] = ssh;
+        if ( (i%(ny+1))*hy == DOMAIN_LENGTH_Y )  {
+            B[i] = ssh;
         // IF the position is the edge where y = 0, x = 0 or x = 2, set related B position with value `0`
-        } else if (floor((i/n_columns)/(ny+1))*hx == DOMAIN_LENGTH_X) {
-        	B[i/n_columns] = 0;
-        } else if (floor((i/n_columns)/(ny+1))*hx == DOMAIN_START_X
-        			|| ((i/n_columns)%(ny+1))*hy == DOMAIN_START_Y ) {
-        	B[i/n_columns] = 0;
+        } else if (floor(i/(ny+1))*hx == DOMAIN_LENGTH_X) {
+            B[i] = 0;
+        } else if (floor(i/(ny+1))*hx == DOMAIN_START_X
+                    || (i%(ny+1))*hy == DOMAIN_START_Y ) {
+            B[i] = 0;
         // If the point is not an edge, set the matrix A line and the related B position
         } else {
             // Put deltax on the variations of x
-            A[i + (ny+1) - (ny+1)] = deltax;
-            A[i + (ny+1) + (ny+1)] = deltax;
+            A[i*n_columns] = 1;
+            //A[i*n_columns + 0] = deltax;
             // Put deltay on the variations of y
-            A[i + (ny+1) - 1] = deltay;
-            A[i + (ny+1) + 1] = deltay;
+            //A[i*n_columns + 1] = deltay;
             // Put the related Fxy for this point
-            B[i/n_columns] = Fxy;
+            B[i] = Fxy;
         }
-        // Set matrix A diagonal with values `1`
-        A[i + (ny+1)] = 1;
+
     }
     
     #if DEBUG
@@ -197,7 +195,7 @@ int main(int argc, char **argv) {
                 if(A[i + j] == 0) {
                     printf("    --     ");
                 } else {
-                    printf("%10f ", A[i + j]);
+                    printf("%d ", A[i + j]);
                 }
             }
             printf("\n");
@@ -223,29 +221,39 @@ int main(int argc, char **argv) {
             initial_time = timestamp();
 
             // Start gs method
-        	for(i=0;i<n_lines*n_columns;i+=n_columns) {
-        		temp = B[i/n_columns];
 
-                long middle = i/n_columns;
-                long x_down = i/n_columns - (ny+1);
-                long x_up = i/n_columns + (ny+1);
-                long y_down = i/n_columns - 1;
-                long y_up = i/n_columns + 1;
-                if(x_down > 0) {
-                    temp -= A[i + (ny+1) - (ny+1)]*x[x_down];
+            for(i=0;i<n_lines;++i) {
+
+                temp= B[i];
+
+                long x_down = i - (ny+1);
+                long x_up = i + (ny+1);
+                long y_down = i - 1;
+                long y_up = i + 1;
+                long line = i*n_columns;
+
+                if(A[line] == 1) {
+                    temp -= deltax*x[i - (ny+1)];
+                    temp -= deltax*x[i + (ny+1)];
+                    temp -= deltay*x[i - 1];
+                    temp -= deltay*x[i + 1];
+                }
+
+                /*if(x_down > 0) {
+                    temp -= A[line + 0]*x[i - (ny+1)];
                 }
                 if(x_up < n_lines) {
-                    temp -= A[i + (ny+1) - (ny+1)]*x[x_up];
+                    temp -= A[line + 0]*x[i + (ny+1)];
                 }
                 if(y_down > 0) {
-                    temp -= A[i + (ny+1) - 1]*x[y_down];
+                    temp -= A[line + 1]*x[i - 1];
                 }
                 if(y_up < n_lines) {
-                    temp -= A[i + (ny+1) + 1]*x[y_up];
-                }
+                    temp -= A[line + 1]*x[i + 1];
+                }*/
 
-        		x[i/n_columns] = temp;
-        	}
+                x[i] = temp;
+            }
 
             gs_time += timestamp() - initial_time;
         } else {
@@ -278,7 +286,7 @@ int main(int argc, char **argv) {
         residue_time += timestamp() - initial_time;
     }
 
-	// ------------------------------------------------------- OUTPUT
+    // ------------------------------------------------------- OUTPUT
 
     // Write the configuration file for the plot
     FILE *fp;
@@ -291,8 +299,10 @@ int main(int argc, char **argv) {
     fprintf(fp, "###########\n");
     // Write mean of iterations for each method
     if(method == GAUSS_SIDEL_METHOD) {
+        printf("# Tempo Método GS: %lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo Método GS: %lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
+        printf("# Tempo Método SOR: %lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo Método SOR: %lf\n", gs_time/n_iterations);
     }
 
@@ -317,36 +327,36 @@ int main(int argc, char **argv) {
     // Save and close file
     fclose(fp);
 
-	// Write the 'out.data' matrix for the plot
-	fp = fopen("out.data", "w+");
-	if(fp == NULL) {
-		printf("Can't create/open file %s\n", output_file);
-		return -1;
-	}
+    // Write the 'out.data' matrix for the plot
+    fp = fopen("out.data", "w+");
+    if(fp == NULL) {
+        printf("Can't create/open file %s\n", output_file);
+        return -1;
+    }
 
     // write the points in x
-	fprintf(fp, " %ld", nx+1);
-	double current_point = DOMAIN_START_X;
-	for(i=0;i<nx+1;i++) {
-		fprintf(fp, " %f", current_point);
-		current_point += hx;
-	}
-	fprintf(fp, "\n");
+    fprintf(fp, " %ld", nx+1);
+    double current_point = DOMAIN_START_X;
+    for(i=0;i<nx+1;i++) {
+        fprintf(fp, " %f", current_point);
+        current_point += hx;
+    }
+    fprintf(fp, "\n");
 
-	// write the points in y
-	current_point = DOMAIN_START_Y;
-	for(i=0;i<ny+1;i++) {
-		fprintf(fp, " %f", current_point);
+    // write the points in y
+    current_point = DOMAIN_START_Y;
+    for(i=0;i<ny+1;i++) {
+        fprintf(fp, " %f", current_point);
 
         // Write the correspondent z points
-		for(j=0;j<nx+1;j++) {
-			fprintf(fp, " %lf", x[(j*(ny+1))+i]);
-		}
+        for(j=0;j<nx+1;j++) {
+            fprintf(fp, " %lf", x[(j*(ny+1))+i]);
+        }
 
-		fprintf(fp, "\n");
-		current_point += hy;
-	}
-	
+        fprintf(fp, "\n");
+        current_point += hy;
+    }
+    
     // Save and close file
-	fclose(fp);
+    fclose(fp);
 }

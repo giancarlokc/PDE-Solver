@@ -226,31 +226,12 @@ int main(int argc, char **argv) {
 
                 temp= B[i];
 
-                long x_down = i - (ny+1);
-                long x_up = i + (ny+1);
-                long y_down = i - 1;
-                long y_up = i + 1;
-                long line = i*n_columns;
-
-                if(A[line] == 1) {
+                if(A[i*n_columns] == 1) {
                     temp -= deltax*x[i - (ny+1)];
                     temp -= deltax*x[i + (ny+1)];
                     temp -= deltay*x[i - 1];
                     temp -= deltay*x[i + 1];
                 }
-
-                /*if(x_down > 0) {
-                    temp -= A[line + 0]*x[i - (ny+1)];
-                }
-                if(x_up < n_lines) {
-                    temp -= A[line + 0]*x[i + (ny+1)];
-                }
-                if(y_down > 0) {
-                    temp -= A[line + 1]*x[i - 1];
-                }
-                if(y_up < n_lines) {
-                    temp -= A[line + 1]*x[i + 1];
-                }*/
 
                 x[i] = temp;
             }

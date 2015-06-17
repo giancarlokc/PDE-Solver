@@ -53,7 +53,7 @@ int compare(double a, double b) {
 long nx, ny, n_iterations;
 long n_lines;
 
-int a(int i) {
+short int a(int i) {
     if (i < ny) {
         return 0;
     }
@@ -155,9 +155,10 @@ int main(int argc, char **argv) {
 
     // Alloc the memory for the equation (Ax = B) and for the residue
     // A uses unsigned char because we really don't need more than a byte
-    //unsigned char *A = (unsigned char *) malloc(n_lines*sizeof(unsigned char));
+    unsigned char *A = (unsigned char *) malloc(n_lines*sizeof(unsigned char));
     double *B = (double*) malloc(n_lines*sizeof(double));
-    double *x = (double*) malloc(n_lines*sizeof(double));
+    double *x = (double*) malloc((n_lines+((ny+1)*2))*sizeof(double));
+    memset (x, 0.0, (n_lines+((ny+1)*2))*sizeof(double));
     double *residue = (double *) malloc(n_lines*sizeof(double));
     double *normVector = (double *) malloc(n_iterations*sizeof(double));
     
@@ -167,7 +168,7 @@ int main(int argc, char **argv) {
 
     // Set initial values for the matrix A and vector B
     for(i=0;i<n_lines;++i){
-        //A[i]=0;
+        A[i]=0;
         //printf("Line %ld:    point:%ld\n", i, i);
         ssh = sin(2*M_PI*floor(i/(ny+1))*hx) * sinh(2*M_PI*(i%(ny+1))*hy);
         Fxy = ((4*M_PI*M_PI) * ssh)/delta;
@@ -189,7 +190,7 @@ int main(int argc, char **argv) {
         // If the point is not an edge, set the matrix A line and the related B position
         } else {
             // A[i] has deltax and deltay
-            //A[i] = 1;
+            A[i] = 1;
             B[i] = Fxy;
         }
 
@@ -202,6 +203,12 @@ int main(int argc, char **argv) {
     // Linear system solving
     double soma;
     double temp;
+    
+    double temp1, temp2, temp3, temp4;
+    double temp5, temp6, temp7, temp8;
+    double temp9, temp10, temp11, temp12;
+    double temp13, temp14, temp15, temp16;
+
     long k;
     double initial_time;
 
@@ -211,46 +218,75 @@ int main(int argc, char **argv) {
             initial_time = timestamp();
 
             // Start gs method
-            for(i=0; i<n_lines; ++i) {
-                temp = B[i];
-
-                if(a(i) == 1) {
-                    temp -= deltax*x[i - (ny+1)];
-                    temp -= deltax*x[i + (ny+1)];
-                    
-                    temp -= deltay*x[i - 1];
-                    temp -= deltay*x[i + 1];
-                }
-
-                x[i] = temp;
-            }
-
-            /*for(i=i; i<n_lines; i+= 2) {
-
-                temp = B[i];
+            for(i=0; i<n_lines%2; ++i) {
+                temp1 = 0;
+                temp2 = 0;
+                temp3 = 0;
+                temp4 = 0;
 
                 if(A[i] == 1) {
-                    temp -= deltax*x[i - (ny+1)];
-                    temp -= deltax*x[i + (ny+1)];
-                    
-                    temp -= deltay*x[i - 1];
-                    temp -= deltay*x[i + 1];
+                    temp1 = deltax*x[i - (ny+1)];
+                    temp2 = deltax*x[i + (ny+1)];
+                    temp3 = deltay*x[i - 1];
+                    temp4 = deltay*x[i + 1];
                 }
 
-                x[i] = temp;
+                x[i] = B[i] - temp1 - temp2 - temp3 - temp4;
+            }
 
-                temp = B[i+1];
+            for(i=i; i<n_lines; i+= 2) {
+                temp1 = 0;
+                temp2 = 0;
+                temp3 = 0;
+                temp4 = 0;
+                temp5 = 0;
+                temp6 = 0;
+                temp7 = 0;
+                temp8 = 0;
+                /*temp9 = 0;
+                temp10 = 0;
+                temp11 = 0;
+                temp12 = 0;
+                temp13 = 0;
+                temp14 = 0;
+                temp15 = 0;
+                temp16 = 0;*/
 
+                if(A[i] == 1) {
+                    temp1 = deltax*x[i - (ny+1)];
+                    temp2 = deltax*x[i + (ny+1)];
+                    
+                    temp3 = deltay*x[i - 1];
+                    temp4 = deltay*x[i + 1];
+                }
                 if(A[i+1] == 1) {
-                    temp -= deltax*x[i+1 - (ny+1)];
-                    temp -= deltax*x[i+1 + (ny+1)];
+                    temp5 = deltax*x[i+1 - (ny+1)];
+                    temp6 = deltax*x[i+1 + (ny+1)];
                     
-                    temp -= deltay*x[i+1 - 1];
-                    temp -= deltay*x[i+1 + 1];
+                    temp7 = deltay*x[i+1 - 1];
+                    temp8 = deltay*x[i+1 + 1];
                 }
+                /*if(A[i+2] == 1) {
+                    temp9  = deltax*x[i+2 - (ny+1)];
+                    temp10 = deltax*x[i+2 + (ny+1)];
+                    
+                    temp11 = deltay*x[i+2 - 1];
+                    temp12 = deltay*x[i+2 + 1];
+                }
+                if(A[i+3] == 1) {
+                    temp13 = deltax*x[i+3 - (ny+1)];
+                    temp14 = deltax*x[i+3 + (ny+1)];
+                    
+                    temp15 = deltay*x[i+3 - 1];
+                    temp16 = deltay*x[i+3 + 1];
+                }*/
+                
 
-                x[i+1] = temp;
-            }*/
+                x[i] = B[i] - temp1 - temp2 - temp3 - temp4;
+                x[i+1] = B[i+1] - temp5 - temp6 - temp7 - temp8;
+                /*x[i+2] = B[i+2] - temp9 - temp10 - temp11 - temp12;
+                x[i+3] = B[i+3] - temp13 - temp14 - temp15 - temp16;*/
+            }
 
             gs_time += timestamp() - initial_time;
         } else {

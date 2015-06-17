@@ -118,7 +118,6 @@ int main(int argc, char **argv) {
 
     // General variables
     long n_lines = (nx+1)*(ny+1);
-    long n_columns = 1;
     double Fxy;
     double ssh;
     double gs_time = 0;
@@ -143,19 +142,19 @@ int main(int argc, char **argv) {
     #endif
 
     // Alloc the memory for the equation (Ax = B) and for the residue
-    short int *A = (short int *) malloc(n_lines*n_columns*sizeof(short int));
+    short int *A = (short int *) malloc(n_lines*sizeof(short int));
     double *B = (double*) malloc(n_lines*sizeof(double));
     double *x = (double*) malloc(n_lines*sizeof(double));
     double *residue = (double *) malloc(n_lines*sizeof(double));
     double *normVector = (double *) malloc(n_iterations*sizeof(double));
     
     #if DEBUG
-        printf("Vector instanciated with %ld positions.\n", n_lines*n_columns);
+        printf("Vector instanciated with %ld positions.\n", n_lines);
     #endif
 
     // Set initial values for the matrix A and vector B
     for(i=0;i<n_lines;++i){
-        //printf("Line %ld:    point:%ld\n", i, i/n_columns);
+        //printf("Line %ld:    point:%ld\n", i, i);
         ssh = sin(2*M_PI*floor(i/(ny+1))*hx) * sinh(2*M_PI*(i%(ny+1))*hy);
         Fxy = ((4*M_PI*M_PI) * ssh)/delta;
 
@@ -176,10 +175,10 @@ int main(int argc, char **argv) {
         // If the point is not an edge, set the matrix A line and the related B position
         } else {
             // Put deltax on the variations of x
-            A[i*n_columns] = 1;
-            //A[i*n_columns + 0] = deltax;
+            A[i] = 1;
+            //A[i + 0] = deltax;
             // Put deltay on the variations of y
-            //A[i*n_columns + 1] = deltay;
+            //A[i + 1] = deltay;
             // Put the related Fxy for this point
             B[i] = Fxy;
         }
@@ -189,9 +188,9 @@ int main(int argc, char **argv) {
     #if DEBUG
         // Print the data
         printf("A= [\n");
-        for(i=0;i<n_lines*n_columns;i+=n_columns){
+        for(i=0;i<n_lines;++i){
             printf("    ");
-            for(j=0;j<n_columns;j++) {
+            for(j=0;j<1;j++) {
                 if(A[i + j] == 0) {
                     printf("    --     ");
                 } else {
@@ -224,9 +223,9 @@ int main(int argc, char **argv) {
 
             for(i=0;i<n_lines;++i) {
 
-                temp= B[i];
+                temp = B[i];
 
-                if(A[i*n_columns] == 1) {
+                if(A[i] == 1) {
                     temp -= deltax*x[i - (ny+1)];
                     temp -= deltax*x[i + (ny+1)];
                     temp -= deltay*x[i - 1];
@@ -247,16 +246,20 @@ int main(int argc, char **argv) {
         // Calculate the residue norm L2
         double norm = 0;
         // Calculate A*x
-        for(i=0;i<n_lines*n_columns;i+=n_columns) {
+        for(i=0;i<n_lines;++i) {
             double sum = 0;
-            for (j=0; j<n_columns; ++j) {
-                sum += A[i + j]*x[j];
+            if(A[i] == 1) {
+                sum += deltax*x[i - (ny+1)];
+                sum += deltax*x[i + (ny+1)];
+                sum += deltay*x[i - 1];
+                sum += deltay*x[i + 1];
             }
-            residue[i/n_columns] = sum;
+            sum += x[i];
+            residue[i] = B[i] - sum;
         }
         // Calculate norm L2 = ||B - Ax||2
         for(i=0;i<n_lines;++i) {
-            norm += (residue[i] - B[i])*(residue[i] - B[i]);
+            norm += residue[i]*residue[i];
         }
         norm = sqrt(norm);
         #if DEBUG

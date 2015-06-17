@@ -20,7 +20,7 @@
 #define DOMAIN_START_Y 0.0
 #define DOMAIN_LENGTH_Y 1.0
 
-#define GAUSS_SIDEL_METHOD 1
+#define GAUSS_SEIDEL_METHOD 1
 #define OVER_RELAXATION_METHOD 2    
 
 #define ERROR 0.05
@@ -50,6 +50,25 @@ int compare(double a, double b) {
     }
 }
 
+long nx, ny, n_iterations;
+long n_lines;
+
+int a(int i) {
+    if (i < ny) {
+        return 0;
+    }
+
+    if (i > n_lines-(ny+2)) {
+        return 0;
+    }
+
+    if ((i-ny)%(ny+1) <= 1) {
+        return 0;
+    }
+
+    return 1;
+}
+
 int main(int argc, char **argv) {
 
     // ------------------------------------------------------- INPUT
@@ -64,8 +83,7 @@ int main(int argc, char **argv) {
     long i, j;
 
     // Parameters
-    long nx, ny, n_iterations;
-    int method = GAUSS_SIDEL_METHOD;
+    int method = GAUSS_SEIDEL_METHOD;
     char* output_file;
     output_file = (char*) malloc(sizeof(char) * 100);
     strcpy(output_file, "solution.txt");
@@ -83,7 +101,7 @@ int main(int argc, char **argv) {
                 n_iterations = atol(argv[i+1]);
             } else if(!strcmp(argv[i], "-m")) {
                 if(!strcmp(argv[i+1], "gs")){
-                    method = GAUSS_SIDEL_METHOD;
+                    method = GAUSS_SEIDEL_METHOD;
                 } else if(!strcmp(argv[i+1], "sor")){
                     method = OVER_RELAXATION_METHOD;
                 } else {
@@ -108,16 +126,10 @@ int main(int argc, char **argv) {
         i+=2;
     }
 
-    // Error message in case of values out of range
-    //if (nx*ny > 100000*100000) {
-    //  fprintf(stderr, "Os valores de nx e ny estão acima do permitido. Tente valores menores.\n");
-    //  return 1;
-    //}
-
     // ------------------------------------------------------- PROCESSING
 
     // General variables
-    long n_lines = (nx+1)*(ny+1);
+    n_lines = (nx+1)*(ny+1);
     double Fxy;
     double ssh;
     double gs_time = 0;
@@ -142,7 +154,8 @@ int main(int argc, char **argv) {
     #endif
 
     // Alloc the memory for the equation (Ax = B) and for the residue
-    short int *A = (short int *) malloc(n_lines*sizeof(short int));
+    // A uses unsigned char because we really don't need more than a byte
+    //unsigned char *A = (unsigned char *) malloc(n_lines*sizeof(unsigned char));
     double *B = (double*) malloc(n_lines*sizeof(double));
     double *x = (double*) malloc(n_lines*sizeof(double));
     double *residue = (double *) malloc(n_lines*sizeof(double));
@@ -154,6 +167,7 @@ int main(int argc, char **argv) {
 
     // Set initial values for the matrix A and vector B
     for(i=0;i<n_lines;++i){
+        //A[i]=0;
         //printf("Line %ld:    point:%ld\n", i, i);
         ssh = sin(2*M_PI*floor(i/(ny+1))*hx) * sinh(2*M_PI*(i%(ny+1))*hy);
         Fxy = ((4*M_PI*M_PI) * ssh)/delta;
@@ -174,41 +188,18 @@ int main(int argc, char **argv) {
             B[i] = 0;
         // If the point is not an edge, set the matrix A line and the related B position
         } else {
-            // Put deltax on the variations of x
-            A[i] = 1;
-            //A[i + 0] = deltax;
-            // Put deltay on the variations of y
-            //A[i + 1] = deltay;
-            // Put the related Fxy for this point
+            // A[i] has deltax and deltay
+            //A[i] = 1;
             B[i] = Fxy;
         }
 
     }
-    
-    #if DEBUG
-        // Print the data
-        printf("A= [\n");
-        for(i=0;i<n_lines;++i){
-            printf("    ");
-            for(j=0;j<1;j++) {
-                if(A[i + j] == 0) {
-                    printf("    --     ");
-                } else {
-                    printf("%d ", A[i + j]);
-                }
-            }
-            printf("\n");
-        }
-        printf("]\n");
-        printf("B=[\n");
-        for(i=0;i<n_lines;i++) {
-            printf("    %f\n", B[i]);
-        }
-        printf("]\n");
-    #endif
 
-    // GAUSS SEIDEL
+    /*for (i=0; i<n_lines; ++i) {
+        printf("%d\n", A[i]);
+    }*/
 
+    // Linear system solving
     double soma;
     double temp;
     long k;
@@ -216,24 +207,50 @@ int main(int argc, char **argv) {
 
     for (k=0; k<n_iterations; ++k) {
 
-        if(method == GAUSS_SIDEL_METHOD) {
+        if(method == GAUSS_SEIDEL_METHOD) {
             initial_time = timestamp();
 
             // Start gs method
-
-            for(i=0;i<n_lines;++i) {
-
+            for(i=0; i<n_lines; ++i) {
                 temp = B[i];
 
-                if(A[i] == 1) {
+                if(a(i) == 1) {
                     temp -= deltax*x[i - (ny+1)];
                     temp -= deltax*x[i + (ny+1)];
+                    
                     temp -= deltay*x[i - 1];
                     temp -= deltay*x[i + 1];
                 }
 
                 x[i] = temp;
             }
+
+            /*for(i=i; i<n_lines; i+= 2) {
+
+                temp = B[i];
+
+                if(A[i] == 1) {
+                    temp -= deltax*x[i - (ny+1)];
+                    temp -= deltax*x[i + (ny+1)];
+                    
+                    temp -= deltay*x[i - 1];
+                    temp -= deltay*x[i + 1];
+                }
+
+                x[i] = temp;
+
+                temp = B[i+1];
+
+                if(A[i+1] == 1) {
+                    temp -= deltax*x[i+1 - (ny+1)];
+                    temp -= deltax*x[i+1 + (ny+1)];
+                    
+                    temp -= deltay*x[i+1 - 1];
+                    temp -= deltay*x[i+1 + 1];
+                }
+
+                x[i+1] = temp;
+            }*/
 
             gs_time += timestamp() - initial_time;
         } else {
@@ -248,9 +265,10 @@ int main(int argc, char **argv) {
         // Calculate A*x
         for(i=0;i<n_lines;++i) {
             double sum = 0;
-            if(A[i] == 1) {
+            if(a(i) == 1) {
                 sum += deltax*x[i - (ny+1)];
                 sum += deltax*x[i + (ny+1)];
+                
                 sum += deltay*x[i - 1];
                 sum += deltay*x[i + 1];
             }
@@ -282,7 +300,7 @@ int main(int argc, char **argv) {
 
     fprintf(fp, "###########\n");
     // Write mean of iterations for each method
-    if(method == GAUSS_SIDEL_METHOD) {
+    if(method == GAUSS_SEIDEL_METHOD) {
         printf("# Tempo Método GS: %lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo Método GS: %lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {

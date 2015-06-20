@@ -30,6 +30,8 @@
 #include <string.h>
 #include <math.h>
 
+#include <likwid.h>
+
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -337,10 +339,10 @@ int main(int argc, char **argv) {
     fprintf(fp, "###########\n");
     // Write mean of iterations for each method
     if(method == GAUSS_SEIDEL_METHOD) {
-        printf("# Tempo Método GS: %lf\n", gs_time/n_iterations);
+        printf("%lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo Método GS: %lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
-        printf("# Tempo Método SOR: %lf\n", gs_time/n_iterations);
+        printf("%lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo Método SOR: %lf\n", gs_time/n_iterations);
     }
 

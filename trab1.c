@@ -30,8 +30,6 @@
 #include <string.h>
 #include <math.h>
 
-#include <likwid.h>
-
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
 #endif
@@ -208,8 +206,6 @@ int main(int argc, char **argv) {
     
     double temp1, temp2, temp3, temp4;
     double temp5, temp6, temp7, temp8;
-    double temp9, temp10, temp11, temp12;
-    double temp13, temp14, temp15, temp16;
 
     long k;
     double initial_time;
@@ -245,14 +241,6 @@ int main(int argc, char **argv) {
                 temp6 = 0;
                 temp7 = 0;
                 temp8 = 0;
-                /*temp9 = 0;
-                temp10 = 0;
-                temp11 = 0;
-                temp12 = 0;
-                temp13 = 0;
-                temp14 = 0;
-                temp15 = 0;
-                temp16 = 0;*/
 
                 if(A[i] == 1) {
                     temp1 = deltax*x[i - (ny+1)];
@@ -267,27 +255,10 @@ int main(int argc, char **argv) {
                     
                     temp7 = deltay*x[i+1 - 1];
                     temp8 = deltay*x[i+1 + 1];
-                }
-                /*if(A[i+2] == 1) {
-                    temp9  = deltax*x[i+2 - (ny+1)];
-                    temp10 = deltax*x[i+2 + (ny+1)];
-                    
-                    temp11 = deltay*x[i+2 - 1];
-                    temp12 = deltay*x[i+2 + 1];
-                }
-                if(A[i+3] == 1) {
-                    temp13 = deltax*x[i+3 - (ny+1)];
-                    temp14 = deltax*x[i+3 + (ny+1)];
-                    
-                    temp15 = deltay*x[i+3 - 1];
-                    temp16 = deltay*x[i+3 + 1];
-                }*/
-                
+                }  
 
                 x[i] = B[i] - temp1 - temp2 - temp3 - temp4;
                 x[i+1] = B[i+1] - temp5 - temp6 - temp7 - temp8;
-                /*x[i+2] = B[i+2] - temp9 - temp10 - temp11 - temp12;
-                x[i+3] = B[i+3] - temp13 - temp14 - temp15 - temp16;*/
             }
 
             gs_time += timestamp() - initial_time;
@@ -340,10 +311,10 @@ int main(int argc, char **argv) {
     // Write mean of iterations for each method
     if(method == GAUSS_SEIDEL_METHOD) {
         printf("%lf\n", gs_time/n_iterations);
-        fprintf(fp, "# Tempo Método GS: %lf\n", gs_time/n_iterations);
+        fprintf(fp, "%lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
         printf("%lf\n", gs_time/n_iterations);
-        fprintf(fp, "# Tempo Método SOR: %lf\n", gs_time/n_iterations);
+        fprintf(fp, "%lf\n", gs_time/n_iterations);
     }
 
     // Write mean for calculating the residue

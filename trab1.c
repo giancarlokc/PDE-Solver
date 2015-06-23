@@ -352,7 +352,7 @@ int main(int argc, char **argv) {
     }
 
     // Write mean for calculating the residue
-    printf("# Tempo Resíduo: %lf\n", residue_time/n_iterations);
+    // printf("# Tempo Resíduo: %lf\n", residue_time/n_iterations);
     fprintf(fp, "# Tempo Resíduo: %lf\n", residue_time/n_iterations);
 
     fprintf(fp, "#\n# Norma do Resíduo\n");

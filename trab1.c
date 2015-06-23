@@ -287,10 +287,10 @@ int main(int argc, char **argv) {
                 sum3 = deltay*x[i - 1];
                 sum4 = deltay*x[i + 1];
             }
-            residue[i] = B[i] - sum1 - sum2 - sum3 - sum4;
+            residue[i] = B[i] - x[i] - sum1 - sum2 - sum3 - sum4;
         }
 
-        for(i=0;i<n_lines;i+=2) {
+        for(i=i;i<n_lines;i+=2) {
             sum1 = 0;
             sum2 = 0;
             sum3 = 0;
@@ -308,14 +308,14 @@ int main(int argc, char **argv) {
                 sum4 = deltay*x[i + 1];
             }
             if(A[i+1] == 1) {
-                sum1 = deltax*x[i+1 - (ny+1)];
-                sum2 = deltax*x[i+1 + (ny+1)];
+                sum5 = deltax*x[i+1 - (ny+1)];
+                sum6 = deltax*x[i+1 + (ny+1)];
                 
-                sum3 = deltay*x[i+1 - 1];
-                sum4 = deltay*x[i+1 + 1];
+                sum7 = deltay*x[i+1 - 1];
+                sum8 = deltay*x[i+1 + 1];
             }
-            residue[i] = B[i] - sum1 - sum2 - sum3 - sum4;
-            residue[i+1] = B[i+1] - sum5 - sum6 - sum7 - sum8;
+            residue[i] = B[i] - x[i] - sum1 - sum2 - sum3 - sum4;
+            residue[i+1] = B[i+1] - x[i+1] - sum5 - sum6 - sum7 - sum8;
         }
 
         // Calculate norm L2 = ||B - Ax||2

@@ -2,3 +2,12 @@ out.data
 solution.txt
 pdeSolver
 *.o
+*.log
+*.aux
+*.out
+*.synctex.gz
+*.toc
+CMakeLists.txt
+*.idea
+*.settings
+.DS_Store

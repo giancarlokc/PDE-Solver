@@ -271,19 +271,53 @@ int main(int argc, char **argv) {
 
         // Calculate the residue norm L2
         double norm = 0;
+        double sum1, sum2, sum3, sum4;
+        double sum5, sum6, sum7, sum8;
         // Calculate A*x
-        for(i=0;i<n_lines;++i) {
-            double sum = 0;
-            if(a(i) == 1) {
-                sum += deltax*x[i - (ny+1)];
-                sum += deltax*x[i + (ny+1)];
+        for(i=0;i<n_lines%2;++i) {
+            sum1 = 0;
+            sum2 = 0;
+            sum3 = 0;
+            sum4 = 0;
+
+            if(A[i] == 1) {
+                sum1 = deltax*x[i - (ny+1)];
+                sum2 = deltax*x[i + (ny+1)];
                 
-                sum += deltay*x[i - 1];
-                sum += deltay*x[i + 1];
+                sum3 = deltay*x[i - 1];
+                sum4 = deltay*x[i + 1];
             }
-            sum += x[i];
-            residue[i] = B[i] - sum;
+            residue[i] = B[i] - sum1 - sum2 - sum3 - sum4;
         }
+
+        for(i=0;i<n_lines;i+=2) {
+            sum1 = 0;
+            sum2 = 0;
+            sum3 = 0;
+            sum4 = 0;
+            sum5 = 0;
+            sum6 = 0;
+            sum7 = 0;
+            sum8 = 0;
+
+            if(A[i] == 1) {
+                sum1 = deltax*x[i - (ny+1)];
+                sum2 = deltax*x[i + (ny+1)];
+                
+                sum3 = deltay*x[i - 1];
+                sum4 = deltay*x[i + 1];
+            }
+            if(A[i+1] == 1) {
+                sum1 = deltax*x[i+1 - (ny+1)];
+                sum2 = deltax*x[i+1 + (ny+1)];
+                
+                sum3 = deltay*x[i+1 - 1];
+                sum4 = deltay*x[i+1 + 1];
+            }
+            residue[i] = B[i] - sum1 - sum2 - sum3 - sum4;
+            residue[i+1] = B[i+1] - sum5 - sum6 - sum7 - sum8;
+        }
+
         // Calculate norm L2 = ||B - Ax||2
         for(i=0;i<n_lines;++i) {
             norm += residue[i]*residue[i];
@@ -311,13 +345,14 @@ int main(int argc, char **argv) {
     // Write mean of iterations for each method
     if(method == GAUSS_SEIDEL_METHOD) {
         printf("%lf\n", gs_time/n_iterations);
-        fprintf(fp, "#%lf\n", gs_time/n_iterations);
+        fprintf(fp, "# Tempo método Gauss-Seidel: %lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
         printf("%lf\n", gs_time/n_iterations);
         fprintf(fp, "#%lf\n", gs_time/n_iterations);
     }
 
     // Write mean for calculating the residue
+    printf("# Tempo Resíduo: %lf\n", residue_time/n_iterations);
     fprintf(fp, "# Tempo Resíduo: %lf\n", residue_time/n_iterations);
 
     fprintf(fp, "#\n# Norma do Resíduo\n");

@@ -109,10 +109,10 @@ int main(int argc, char **argv) {
 	}
 
     // Error message in case of values out of range
-	if (nx*ny > 1000*1000) {
+	/*if (nx*ny > 1000*1000) {
 		fprintf(stderr, "Os valores de nx e ny estão acima do permitido. Tente valores menores.\n");
 		return 1;
-	}
+	}*/
 
 	// ------------------------------------------------------- PROCESSING
 
@@ -291,6 +291,7 @@ int main(int argc, char **argv) {
     fprintf(fp, "###########\n");
     // Write mean of iterations for each method
     if(method == GAUSS_SIDEL_METHOD) {
+    	printf("%lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo Método GS: %lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
         fprintf(fp, "# Tempo Método SOR: %lf\n", gs_time/n_iterations);

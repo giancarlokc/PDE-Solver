@@ -1,5 +1,6 @@
 #!/bin/bash
 
+#SIZES="50 51 102 102 102 151 204 204"
 SIZES="500 512 1022 1024 1026 1512 2046 2048"
 
 # Remove previous test files

@@ -311,10 +311,10 @@ int main(int argc, char **argv) {
     // Write mean of iterations for each method
     if(method == GAUSS_SEIDEL_METHOD) {
         printf("%lf\n", gs_time/n_iterations);
-        fprintf(fp, "%lf\n", gs_time/n_iterations);
+        fprintf(fp, "#%lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
         printf("%lf\n", gs_time/n_iterations);
-        fprintf(fp, "%lf\n", gs_time/n_iterations);
+        fprintf(fp, "#%lf\n", gs_time/n_iterations);
     }
 
     // Write mean for calculating the residue

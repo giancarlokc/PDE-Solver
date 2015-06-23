@@ -39,6 +39,6 @@ echo "plot \"out.dat\" with lines" >> showgraph.txt
 
 gnuplot --persist showgraph.txt
 
-rm -f out.data
-rm -f solution.txt
-rm -f showgraph.txt
+#rm -f out.data
+#rm -f solution.txt
+#rm -f showgraph.txt

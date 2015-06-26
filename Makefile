@@ -1,7 +1,7 @@
     LIB = -lm
     PROG = pdeSolver
     OBJS   = trab1.o
-    CC     = gcc -g
+    CC     = gcc -g -O2
 
 %.o: %.c
 	$(CC) -c $< 

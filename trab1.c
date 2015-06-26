@@ -217,7 +217,7 @@ int main(int argc, char **argv) {
 
     for (k=0; k<n_iterations; ++k) {
         if(USE_LIKWID) {
-            likwid_markerStartRegion();
+            likwid_markerStartRegion("teste");
         }
 
         if(method == GAUSS_SEIDEL_METHOD) {
@@ -255,7 +255,7 @@ int main(int argc, char **argv) {
             	}
             }
 if(USE_LIKWID) {
-        likwid_markerInit();
+        likwid_markerStopRegion("teste");
     }
 
 

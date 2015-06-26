@@ -42,4 +42,3 @@ gnuplot --persist showgraph.txt
 
 rm -f out.data
 rm -f solution.txt
-rm -f showgraph.txt

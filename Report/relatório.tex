@@ -67,18 +67,19 @@ A máquina escolhida para testes foi a \textbf{achel} do departamento de inform�
 
 \begin{align}
 	T &\cong n_x + 1 = n_y + 1 \\
+	|A| &= ((n_x+1)\times(n_y+1))^2\times8 bytes \cong T^4\times8 bytes \\
 	|X| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
 	|B| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
 	|R| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
-	|X| + |B| + |R| &= 24000000000 \\
-	3\times T^2\times8 &= 24000000000 \\
-	T^2 &= 1000000000\\
-	T &\cong 31622
+	|A| + |X| + |B| + |R| &= 24000000000 \\
+	(T^4 + 3\times T^2)\times8 &= 24000000000 \\
+	T^4 + 3\times T^2 &= 3000000000\\
+	T &\cong 234,03
 \end{align}
 
 \paragraph{}
 A nova versão do programa aceita valores de até aproximadamente 1.732 para $n_y$ e $n_x$ numa máquina com 24GB de RAM e desconsiderando o uso de memória virtual.
-Ou seja, pode computar até 3.000.000 de pontos.
+Ou seja, pode computar até 54.756 de pontos.
 
 \newpage
 

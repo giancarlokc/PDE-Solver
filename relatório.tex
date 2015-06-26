@@ -66,18 +66,19 @@ A máquina escolhida para testes foi a achel do departamento de informática da 
 \section{Limite Superior da Discretização}
 
 \begin{align}
-	T &\cong n_x \cong n_y \\
+	T &\cong n_x + 1 = n_y + 1 \\
 	|X| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
 	|B| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
-	|X| + |B| &= 256000000 \\
-	2\times T^2\times8 &= 256000000 \\
-	T^2 &= 16000000\\
-	T &= 4000
+	|R| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
+	|X| + |B| + |R| &= 24000000 \\
+	3\times T^2\times8 &= 24000000 \\
+	T^2 &= 3000000\\
+	T &\cong 1732
 \end{align}
 
 \paragraph{}
-A nova versão do programa aceita valores de até aproximadamente 4.000 para $n_y$ e $n_x$ numa máquina com 256GB de RAM.
-Ou seja, pode computar até 16.000 pontos.
+A nova versão do programa aceita valores de até aproximadamente 1.732 para $n_y$ e $n_x$ numa máquina com 24GB de RAM e desconsiderando o uso de memória virtual.
+Ou seja, pode computar até 3.000.000 de pontos.
 
 \newpage
 

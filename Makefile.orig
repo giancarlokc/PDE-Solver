@@ -1,0 +1,21 @@
+    LIB = -lm -llikwid -L/home/soft/likwid/lib
+    INC = -I/home/soft/likwid/include
+    PROG = pdeSolver
+    OBJS   = trab1.o
+<<<<<<< HEAD
+    CC     = gcc -O3 -g
+=======
+    CC     = gcc -g -O2
+>>>>>>> cef42452b1b4096078b1778fb5fa4e7ab56956b6
+
+%.o: %.c
+	$(CC) -c $(INC) $< 
+
+$(PROG):  $(OBJS)
+	$(CC) -o $@ $^ $(LIB)
+
+clean:
+	@rm -f *~ *.bak *.o $(PROG) out.data solution.txt
+
+all: $(PROG)
+	$(CC) -o $@ $^ $(LIB)

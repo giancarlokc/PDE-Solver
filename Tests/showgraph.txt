@@ -1,3 +1,0 @@
-set title "3D surface from a grid (matrix) of Z values"
-set datafile separator "|
-plot "out.dat" with lines

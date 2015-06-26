@@ -1,11 +1,10 @@
-    LIB = -lm -llikwid -L/home/soft/likwid/lib
-    INC = -I/home/soft/likwid/include
+    LIB = -lm
     PROG = pdeSolver
     OBJS   = trab1.o
     CC     = gcc -O3 -g
 
 %.o: %.c
-	$(CC) -c $(INC) $< 
+	$(CC) -c $< 
 
 $(PROG):  $(OBJS)
 	$(CC) -o $@ $^ $(LIB)

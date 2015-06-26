@@ -40,4 +40,6 @@ echo "plot \"out.dat\" with lines" >> showgraph.txt
 
 gnuplot --persist showgraph.txt
 
+# Remove files from the pdeSolver execution
 rm -f solution.txt
+rm -f out.data

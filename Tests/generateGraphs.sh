@@ -1,6 +1,7 @@
 #!/bin/bash
 
-SIZES="500 512 1022 1024 1026 1512 2046 2048"
+#SIZES="50 51 102 102 102 151 204 204"
+SIZES="500 512 1022 1024 1026 2046 2048"
 
 # Remove previous test files
 echo "Removing previous test files..."
@@ -39,6 +40,6 @@ echo "plot \"out.dat\" with lines" >> showgraph.txt
 
 gnuplot --persist showgraph.txt
 
-#rm -f out.data
-#rm -f solution.txt
-#rm -f showgraph.txt
+# Remove files from the pdeSolver execution
+rm -f solution.txt
+rm -f out.data

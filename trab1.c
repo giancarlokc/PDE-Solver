@@ -216,12 +216,14 @@ int main(int argc, char **argv) {
     }
 
     for (k=0; k<n_iterations; ++k) {
-        if(USE_LIKWID) {
-            likwid_markerStartRegion("teste");
-        }
+        
 
         if(method == GAUSS_SEIDEL_METHOD) {
             initial_time = timestamp();
+
+		if(USE_LIKWID) {
+		    likwid_markerStartRegion("GS");
+		}
 
             // Start gs method
             for (i=1; i<(nx+1); ++i) {
@@ -254,9 +256,9 @@ int main(int argc, char **argv) {
 	                x[index2] = B[index2] - temp5 - temp6 - temp7 - temp8;
             	}
             }
-if(USE_LIKWID) {
-        likwid_markerStopRegion("teste");
-    }
+		if(USE_LIKWID) {
+			likwid_markerStopRegion("GS");
+		}
 
 
             /*for(i=(ny+2); i<n_lines; ++i) {
@@ -318,6 +320,10 @@ if(USE_LIKWID) {
         double sum5, sum6, sum7, sum8;
         // Calculate A*x
 
+	if(USE_LIKWID) {
+	    likwid_markerStartRegion("Residuo");
+	}
+
         for (i=1; i<(nx+1); ++i) {
             for (j=1; j<(ny+1)%2; ++j) {
             	index1 = i*(ny+1) + j;
@@ -348,6 +354,10 @@ if(USE_LIKWID) {
                 residue[index2] = B[index2] - x[index2] - sum5 - sum6 - sum7 - sum8;
             }
         }
+
+	if(USE_LIKWID) {
+		likwid_markerStopRegion("Residuo");
+	}
 
         /*for(i=0;i<n_lines%2;++i) {
             sum1 = 0;

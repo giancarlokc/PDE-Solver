@@ -25,6 +25,8 @@
 
 #define ERROR 0.05
 
+#define USE_LIKWID 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -216,8 +218,16 @@ int main(int argc, char **argv) {
     double temp;
     long k;
     double initial_time;
+    
+     if(USE_LIKWID) {
+        likwid_markerInit();
+    }
 
     for (k=0; k<n_iterations; ++k) {
+
+	    if(USE_LIKWID) {
+            likwid_markerStartRegion("Compute");
+        }
 
         if(method == GAUSS_SIDEL_METHOD) {
             initial_time = timestamp();
@@ -253,6 +263,10 @@ int main(int argc, char **argv) {
             return 1;
         }
 
+	    if(USE_LIKWID) {
+                likwid_markerStopRegion("Compute");
+	    }
+
         initial_time = timestamp();
 
         // Calculate the residue norm L2
@@ -277,7 +291,12 @@ int main(int argc, char **argv) {
 
         residue_time += timestamp() - initial_time;
     }
+    
+     if(USE_LIKWID) {
+            likwid_markerClose();
+    }
 
+    
 	// ------------------------------------------------------- OUTPUT
 
     // Write the configuration file for the plot

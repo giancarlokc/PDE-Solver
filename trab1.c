@@ -25,10 +25,13 @@
 
 #define ERROR 0.05
 
+#define USE_LIKWID 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <likwid.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -208,7 +211,14 @@ int main(int argc, char **argv) {
     long k;
     double initial_time;
 
+    if(USE_LIKWID) {
+        likwid_markerInit();
+    }
+
     for (k=0; k<n_iterations; ++k) {
+        if(USE_LIKWID) {
+            likwid_markerStartRegion();
+        }
 
         if(method == GAUSS_SEIDEL_METHOD) {
             initial_time = timestamp();
@@ -244,6 +254,9 @@ int main(int argc, char **argv) {
 	                x[index2] = B[index2] - temp5 - temp6 - temp7 - temp8;
             	}
             }
+if(USE_LIKWID) {
+        likwid_markerInit();
+    }
 
 
             /*for(i=(ny+2); i<n_lines; ++i) {
@@ -391,6 +404,10 @@ int main(int argc, char **argv) {
         normVector[k] = norm;
 
         residue_time += timestamp() - initial_time;
+    }
+    
+    if(USE_LIKWID) {
+        likwid_markerClose();
     }
 
     // ------------------------------------------------------- OUTPUT

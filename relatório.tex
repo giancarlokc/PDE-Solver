@@ -101,7 +101,11 @@ Para isso, otimizações foram feitas nas estruturas de dados usadas durante o c
 	As linhas que não continham $h_x$ e $h_y$ representavam os pontos das bordas da grade, que são calculadas separadamente.
 	Logo, foi possível ver que uma matriz que simplesmente nos dizia se um determinado ponto é ou não uma borda era suficiente para fazer os cálculos de Gauss-Seidel, se salvássemos $h_x$ e $h_y$ em variáveis separadas.
 	
-	Portanto, na versão atual, a matriz $A$ tem o tamanho de $(n_x+1)\times(n_y+1)$ e utiliza o tipo de dados \emph{short int}, pois apenas armazenamos $0$ quando o ponto é uma borda ou $1$ caso contrário.
+	Portanto, a matriz $A$ passou a ter o tamanho de $(n_x+1)\times(n_y+1)$ e utiliza o tipo de dados \emph{short int}, pois apenas armazenamos $0$ quando o ponto é uma borda ou $1$ caso contrário.
+	
+	Após isso, percebemos que não havia necessidade de armazenar essas informações em um vetor de qualquer maneira.
+	Assim, modificamos o laço do Gauss-Seidel para que percorra apenas as posições relevantes de $x$ e $B$ (que correspondem aos pontos que não são bordas).
+	Dessa forma, é possível evitar condições durante o laço, pois os elementos de $x$ correspondentes a posições de borda serão $0$ e, na multiplicação, tornarão os valores a serem desconsiderados em $0$ também.
 
 	\subsection{Código}
 	

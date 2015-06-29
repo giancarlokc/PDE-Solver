@@ -25,10 +25,13 @@
 
 #define ERROR 0.05
 
+#define USE_LIKWID 1
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <likwid.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -155,10 +158,9 @@ int main(int argc, char **argv) {
 
     // Alloc the memory for the equation (Ax = B) and for the residue
     // A uses unsigned char because we really don't need more than a byte
-    unsigned char *A = (unsigned char *) malloc(n_lines*sizeof(unsigned char));
     double *B = (double*) malloc(n_lines*sizeof(double));
-    double *x = (double*) malloc((n_lines+((ny+1)*2))*sizeof(double));
-    memset (x, 0.0, (n_lines+((ny+1)*2))*sizeof(double));
+    double *x = (double*) malloc(n_lines*sizeof(double));
+    memset (x, 0.0, (n_lines*sizeof(double)));
     double *residue = (double *) malloc(n_lines*sizeof(double));
     double *normVector = (double *) malloc(n_iterations*sizeof(double));
     
@@ -168,7 +170,6 @@ int main(int argc, char **argv) {
 
     // Set initial values for the matrix A and vector B
     for(i=0;i<n_lines;++i){
-        A[i]=0;
         //printf("Line %ld:    point:%ld\n", i, i);
         ssh = sin(2*M_PI*floor(i/(ny+1))*hx) * sinh(2*M_PI*(i%(ny+1))*hy);
         Fxy = ((4*M_PI*M_PI) * ssh)/delta;
@@ -190,7 +191,6 @@ int main(int argc, char **argv) {
         // If the point is not an edge, set the matrix A line and the related B position
         } else {
             // A[i] has deltax and deltay
-            A[i] = 1;
             B[i] = Fxy;
         }
 
@@ -206,17 +206,62 @@ int main(int argc, char **argv) {
     
     double temp1, temp2, temp3, temp4;
     double temp5, temp6, temp7, temp8;
+    long index1, index2;
 
     long k;
     double initial_time;
 
+    if(USE_LIKWID) {
+        likwid_markerInit();
+    }
+
     for (k=0; k<n_iterations; ++k) {
+        
 
         if(method == GAUSS_SEIDEL_METHOD) {
             initial_time = timestamp();
 
+		if(USE_LIKWID) {
+		    likwid_markerStartRegion("GS");
+		}
+
             // Start gs method
-            for(i=0; i<n_lines%2; ++i) {
+            for (i=1; i<(nx+1); ++i) {
+            	for (j=1; j<(ny+1)%2; ++j) {
+            		index1 = i*(ny+1) + j;
+
+                    temp1 = deltax*x[index1 - (ny+1)];
+                    temp2 = deltax*x[index1 + (ny+1)];
+                    temp3 = deltay*x[index1 - 1];
+                    temp4 = deltay*x[index1 + 1];
+
+	                x[index1] = B[index1] - temp1 - temp2 - temp3 - temp4;
+            	}
+
+            	for (j=j; j<(ny+1); j+=2) {
+            		index1 = i*(ny+1) + j;
+            		index2 = i*(ny+1) + j + 1;
+
+                    temp1 = deltax*x[index1 - (ny+1)];
+                    temp2 = deltax*x[index1 + (ny+1)];
+                    temp3 = deltay*x[index1 - 1];
+                    temp4 = deltay*x[index1 + 1];
+
+                    temp5 = deltax*x[index2 - (ny+1)];
+                    temp6 = deltax*x[index2 + (ny+1)];
+                    temp7 = deltay*x[index2 - 1];
+                    temp8 = deltay*x[index2 + 1];
+
+	                x[index1] = B[index1] - temp1 - temp2 - temp3 - temp4;
+	                x[index2] = B[index2] - temp5 - temp6 - temp7 - temp8;
+            	}
+            }
+		if(USE_LIKWID) {
+			likwid_markerStopRegion("GS");
+		}
+
+
+            /*for(i=(ny+2); i<n_lines; ++i) {
                 temp1 = 0;
                 temp2 = 0;
                 temp3 = 0;
@@ -230,9 +275,9 @@ int main(int argc, char **argv) {
                 }
 
                 x[i] = B[i] - temp1 - temp2 - temp3 - temp4;
-            }
+            }*/
 
-            for(i=i; i<n_lines; i+= 2) {
+            /*for(i=i; i<n_lines; i+= 2) {
                 temp1 = 0;
                 temp2 = 0;
                 temp3 = 0;
@@ -259,7 +304,7 @@ int main(int argc, char **argv) {
 
                 x[i] = B[i] - temp1 - temp2 - temp3 - temp4;
                 x[i+1] = B[i+1] - temp5 - temp6 - temp7 - temp8;
-            }
+            }*/
 
             gs_time += timestamp() - initial_time;
         } else {
@@ -274,7 +319,47 @@ int main(int argc, char **argv) {
         double sum1, sum2, sum3, sum4;
         double sum5, sum6, sum7, sum8;
         // Calculate A*x
-        for(i=0;i<n_lines%2;++i) {
+
+	if(USE_LIKWID) {
+	    likwid_markerStartRegion("Residuo");
+	}
+
+        for (i=1; i<(nx+1); ++i) {
+            for (j=1; j<(ny+1)%2; ++j) {
+            	index1 = i*(ny+1) + j;
+
+            	sum1 = deltax*x[index1 - (ny+1)];
+                sum2 = deltax*x[index1 + (ny+1)];
+                sum3 = deltay*x[index1 - 1];
+                sum4 = deltay*x[index1 + 1];
+
+                residue[index1] = B[index1] - x[index1] - sum1 - sum2 - sum3 - sum4;
+            }
+
+            for (j=j; j<(ny+1); j+=2) {
+            	index1 = i*(ny+1) + j;
+            	index2 = i*(ny+1) + j+1;
+
+            	sum1 = deltax*x[index1 - (ny+1)];
+                sum2 = deltax*x[index1 + (ny+1)];
+                sum3 = deltay*x[index1 - 1];
+                sum4 = deltay*x[index1 + 1];
+
+                sum5 = deltax*x[index2 - (ny+1)];
+                sum6 = deltax*x[index2 + (ny+1)];
+                sum7 = deltay*x[index2 - 1];
+                sum8 = deltay*x[index2 + 1];
+
+                residue[index1] = B[index1] - x[index1] - sum1 - sum2 - sum3 - sum4;
+                residue[index2] = B[index2] - x[index2] - sum5 - sum6 - sum7 - sum8;
+            }
+        }
+
+	if(USE_LIKWID) {
+		likwid_markerStopRegion("Residuo");
+	}
+
+        /*for(i=0;i<n_lines%2;++i) {
             sum1 = 0;
             sum2 = 0;
             sum3 = 0;
@@ -316,7 +401,7 @@ int main(int argc, char **argv) {
             }
             residue[i] = B[i] - x[i] - sum1 - sum2 - sum3 - sum4;
             residue[i+1] = B[i+1] - x[i+1] - sum5 - sum6 - sum7 - sum8;
-        }
+        }*/
 
         // Calculate norm L2 = ||B - Ax||2
         for(i=0;i<n_lines;++i) {
@@ -329,6 +414,10 @@ int main(int argc, char **argv) {
         normVector[k] = norm;
 
         residue_time += timestamp() - initial_time;
+    }
+    
+    if(USE_LIKWID) {
+        likwid_markerClose();
     }
 
     // ------------------------------------------------------- OUTPUT

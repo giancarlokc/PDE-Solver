@@ -11,4 +11,3 @@ CMakeLists.txt
 *.idea
 *.settings
 .DS_Store
-*.dat

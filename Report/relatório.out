@@ -1,0 +1,26 @@
+\BOOKMARK [1][-]{section.1}{Introdu\347\343o}{}% 1
+\BOOKMARK [1][-]{section.2}{An\341lise de Arquitetura}{}% 2
+\BOOKMARK [2][-]{subsection.2.1}{Topologia dos Processadores}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Topografia de Cache}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Mem\363ria}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{An\341lise Geral}{}% 6
+\BOOKMARK [2][-]{subsection.3.1}{Programa Original}{section.3}% 7
+\BOOKMARK [3][-]{subsubsection.3.1.1}{Limite Superior da Discretiza\347\343o}{subsection.3.1}% 8
+\BOOKMARK [3][-]{subsubsection.3.1.2}{Tempo de Execu\347\343o}{subsection.3.1}% 9
+\BOOKMARK [2][-]{subsection.3.2}{Programa Otimizado}{section.3}% 10
+\BOOKMARK [3][-]{subsubsection.3.2.1}{Limite Superior da Discretiza\347\343o}{subsection.3.2}% 11
+\BOOKMARK [3][-]{subsubsection.3.2.2}{Tempo de Execu\347\343o}{subsection.3.2}% 12
+\BOOKMARK [1][-]{section.4}{An\341lise de Fun\347\365es}{}% 13
+\BOOKMARK [2][-]{subsection.4.1}{Programa Original}{section.4}% 14
+\BOOKMARK [3][-]{subsubsection.4.1.1}{M\351todo de Gauss-Seidel}{subsection.4.1}% 15
+\BOOKMARK [3][-]{subsubsection.4.1.2}{C\341lculo do Res\355duo}{subsection.4.1}% 16
+\BOOKMARK [2][-]{subsection.4.2}{Programa Otimizado}{section.4}% 17
+\BOOKMARK [3][-]{subsubsection.4.2.1}{M\351todo de Gauss-Seidel}{subsection.4.2}% 18
+\BOOKMARK [3][-]{subsubsection.4.2.2}{C\341lculo do Res\355duo}{subsection.4.2}% 19
+\BOOKMARK [2][-]{subsection.4.3}{An\341lise dos Dados}{section.4}% 20
+\BOOKMARK [1][-]{section.5}{Otimiza\347\343o do Ponto de Interesse}{}% 21
+\BOOKMARK [2][-]{subsection.5.1}{Estrutura de dados}{section.5}% 22
+\BOOKMARK [2][-]{subsection.5.2}{C\363digo}{section.5}% 23
+\BOOKMARK [1][-]{section.6}{Resultados}{}% 24
+\BOOKMARK [2][-]{subsection.6.1}{Tempo}{section.6}% 25
+\BOOKMARK [2][-]{subsection.6.2}{Mem\363ria}{section.6}% 26

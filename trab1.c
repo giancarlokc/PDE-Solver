@@ -144,6 +144,8 @@ int main(int argc, char **argv) {
     	printf("Delta Y = %lf\n", deltay);
     #endif
 
+    double total_time = timestamp();
+
     // Alloc the memory for the equation (Ax = B) and for the residue
     double *A = (double *) malloc(n_lines*n_columns*sizeof(double));
     double *B = (double*) malloc(n_lines*sizeof(double));
@@ -298,6 +300,8 @@ int main(int argc, char **argv) {
 
     
 	// ------------------------------------------------------- OUTPUT
+    total_time = timestamp() - total_time;
+    printf("%lf\n", total_time);
 
     // Write the configuration file for the plot
     FILE *fp;
@@ -310,7 +314,6 @@ int main(int argc, char **argv) {
     fprintf(fp, "###########\n");
     // Write mean of iterations for each method
     if(method == GAUSS_SIDEL_METHOD) {
-    	printf("%lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo Método GS: %lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
         fprintf(fp, "# Tempo Método SOR: %lf\n", gs_time/n_iterations);

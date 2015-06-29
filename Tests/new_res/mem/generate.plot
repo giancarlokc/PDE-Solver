@@ -1,4 +1,4 @@
-set title "3D surface from a grid (matrix) of Z values"
+set title "Memory bandwidth MBytes/s"
 set datafile separator "|
 set terminal png size 800,600 enhanced font "Helvetica,20"
 set output 'output.png'

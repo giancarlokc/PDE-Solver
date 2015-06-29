@@ -11,6 +11,7 @@
 \usepackage{graphicx}
 \usepackage{verbatimbox}
 \usepackage{ esint }
+\usepackage[margin=1in]{geometry}
 
 % Definições de titulo e autores %
 \title{CI164\\Iniciação à Computação Científica\\Trabalho 2}
@@ -36,15 +37,19 @@
 % ------------------------------------------------------ %
 \section{Introdução}
 O objetivo deste trabalho é a implementação de programa para resolver o PDE:
-\begin{align}
+\begin{align*}
 	- \Delta u(x,y) + k^2u(x,y) &= \fint (x,y),	(x,y) \in \Omega\\
 	\fint(x,y) &= 4 \pi sin(2 \pi x) sinh(2 \pi y) \\
 	\Omega &= [0,2] \times [0,1] \\
 	u(x,1) &= sin(2 \pi x) sinh(2 \pi) \\
 	u(x,0) &= u(0,y) = u(2,y) = 0
-\end{align}
+\end{align*}
 
-Após o programa inicial foi feito, várias alterações foram feitas para melhorar o desempenho. Os métodos utilizados para análise do código, sistema de testes, otimizações de código e de estruturas de dados são descritas nas seções seguintes.
+Após o programa inicial foi feito, várias alterações foram feitas para melhorar o desempenho.
+Os métodos utilizados para análise do código, sistema de testes, otimizações de código e de estruturas de dados são descritas nas seções seguintes.
+	
+O programa submetido originalmente como Trabalho 1 desta disciplina utilizava uma quantidade de memória tão grande que tornava inviável o seu uso em alguns dos testes abaixo, pois não havia memória suficiente na achel.
+Portanto, no decorrer deste texto, o ``programa original'' refere-se a uma versão alterada com consumo reduzido de memória, que permitiu a execução de todos os testes.
 
 \newpage
 
@@ -75,172 +80,110 @@ A máquina escolhida para testes foi a \textbf{achel} do departamento de inform�
 % ------------------------------------------------------ %
 \section{Análise Geral}
 
-	\subsection{Programa Original}
-	\subsubsection{Limite Superior da Discretização}
+	\subsection{Limite Superior da Discretização}
 
-	\begin{align}
+	\begin{align*}
 		T &\cong n_x + 1 = n_y + 1 \\
-		|A| &= ((n_x+1)\times(n_y+1))^2\times8 bytes \cong T^4\times8 bytes \\
+		|A| &= (n_x+1)\times(n_y+1)\times(2\times(ny+1)+1)\times8 bytes \\
+		|A| &\cong 2\times T^3\times8 bytes \\
 		|X| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
 		|B| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
 		|R| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
 		|A| + |X| + |B| + |R| &= 24000000000 \\
-		(T^4 + 3\times T^2)\times8 &= 24000000000 \\
-		T^4 + 3\times T^2 &= 3000000000 \\
-		T &\cong 234,03
-	\end{align}
+		(2\times T^3 + 3\times T^2)\times8 &= 24000000000 \\
+		2\times T^3 + 3\times T^2 &= 3000000000 \\
+		T &\cong 1144
+	\end{align*}
 
-	A nova versão do programa aceita valores de até aproximadamente 234 para $n_y$ e $n_x$ numa máquina com 24GB de 	RAM e desconsiderando o uso de memória virtual e qualquer outro uso de memória que seja necessário.
+	A nova versão do programa aceita valores de até aproximadamente 1.143 para $n_y$ e $n_x$ numa máquina com 24GB de 	RAM e desconsiderando o uso de memória virtual e qualquer outro uso de memória que seja necessário.
 	%Ou seja, pode computar até 54.756 pontos.
 
-	\subsubsection{Tempo de Execução}
+	\subsection{Tempo de Execução}
 	\begin{figure}[ht!]
 		\centering
 		\includegraphics[width=90mm]{oldtime.png}
-		\caption{Tempo para N\{x,y\} = \{500, 512\} no programa alterado para consumir menos memória
-		\label{overflow}}
+		\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026\} no programa original}
 	\end{figure}
 	
-	O programa original foi implementado com a matriz A completa.
-	Isto fez com que houvesse muito uso de memória, de modo que na achel não era possível executar discretizações grandes suficientes para o gráfico de tempo iniciado em 500.
-	
-	Fizemos uma alteração para reduzir o uso de memória, mas ainda assim só foi possível executar discretizações de até 512 separações em x e y.
-	
-	\subsection{Programa Otimizado}
-	\subsubsection{Limite Superior da Discretização}
-
-	\begin{align}
-		T &\cong n_x + 1 = n_y + 1 \\
-		|X| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
-		|B| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
-		|R| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
-		|X| + |B| + |R| &= 24000000000 \\
-		3\times T^2\times8 &= 24000000000 \\
-		T^2 &= 1000000000\\
-		T &\cong 31622
-	\end{align}
-
-	A nova versão do programa aceita valores de até aproximadamente 31.622 para $n_y$ e $n_x$ numa máquina com 24GB de 	RAM e desconsiderando o uso de memória virtual e qualquer outro uso de memória que seja necessário.
-	%Ou seja, pode computar até 54.756 de pontos.
-	
-	Apesar do programa original ser um desastre, o novo programa é razoável, mas mesmo assim uma bosta. Sabe porque? por causa da porra da alemanha chamada likwid! caralho.
-	
-	\subsubsection{Tempo de Execução}
-	\begin{figure}[ht!]
-		\centering
-		\includegraphics[width=90mm]{newtime.png}
-		\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-		\label{overflow}}
-	\end{figure}
-\newpage
+	\newpage
 
 % ------------------------------------------------------ %
 \section{Análise de Funções}
 
-	\subsection{Programa Original}
+	\subsection{Cálculo do Número de Operações\\ em Ponto Flutuante}
+		Para obtermos a função $FLOPS$ de cada versão do programa, simplesmente contamos o número de operações em ponto flutuante realizadas dentro do laço principal da função analisada (Gauss-Seidel ou cálculo do resíduo) e multiplicamos esse número pela quantidade de vezes que o laço é executado: $(n_x + 1)\times(n_y + 1)$.
+		\subsubsection{Método de Gauss-Seidel}
+		\begin{align*}
+			FLOPS(n_x,n_y) &= 8\times(n_x+1)\times(n_y+1)
+		\end{align*}
+		\subsubsection{Cálculo do Resíduo}
+		\begin{align*}
+			FLOPS(n_x,n_y) &= 2\times(n_x+1)\times(n_y+1)\times(2\times(ny+1)+1)
+		\end{align*}
+			
+	\subsection{Cálculo da Quantidade de Memória Utilizada}
+		Para obtermos a quantidade de memória utilizada, bastou somar os tamanhos dos vetores utilizados e multiplicar o resultado por 8, que é o tamanho em bytes do tipo \texttt{double} em C.
+		\begin{align*}
+			MEM(n_x,n_y) &= ((n_x+1)\times(n_y+1)\times(2\times(ny+1)+1)+3\times(n_x+1)\times(n_y+1))\times 8bytes
+		\end{align*}
+		
+
+	\newpage
+	\subsection{Gráficos de Desempenho}
 		\subsubsection{Método de Gauss-Seidel}
 		\begin{figure}[ht!]
 			\centering
 			\includegraphics[width=90mm]{old_gs_cache.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
+			\caption{Porcentagem de cache misses para N\{x,y\} = \{256, 512, 1024\} no programa original}
 		\end{figure}
-		\newpage
-		
+
 		\begin{figure}[ht!]
 			\centering
 			\includegraphics[width=90mm]{old_gs_flops.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
+			\caption{Número de operações em ponto flutante para N\{x,y\} = \{256, 512, 1024\} no programa original}
 		\end{figure}
-		\newpage
 		
+		\newpage
 		\begin{figure}[ht!]
 			\centering
 			\includegraphics[width=90mm]{old_gs_mem.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
+			\caption{Banda de memória para N\{x,y\} = \{256, 512, 1024\} no programa original}
 		\end{figure}
-		\newpage		
 		
+		\newpage
 		\subsubsection{Cálculo do Resíduo}
 		\begin{figure}[ht!]
 			\centering
 			\includegraphics[width=90mm]{old_res_cache.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
+			\caption{Porcentagem de cache misses para N\{x,y\} = \{256, 512, 1024\} no programa original}
 		\end{figure}
-		\newpage
-
+		
 		\begin{figure}[ht!]
 			\centering
 			\includegraphics[width=90mm]{old_res_flops.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
+			\caption{Número de operações em ponto flutuante para N\{x,y\} = \{256, 512, 1024\} no programa original}
 		\end{figure}
+
 		\newpage
-		
 		\begin{figure}[ht!]
 			\centering
 			\includegraphics[width=90mm]{old_res_mem.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
+			\caption{Banda de memória para N\{x,y\} = \{256, 512, 1024\} no programa original}
 		\end{figure}
-		\newpage		
-		
-	\subsection{Programa Otimizado}
-		\subsubsection{Método de Gauss-Seidel}
-		\begin{figure}[ht!]
-			\centering
-			\includegraphics[width=90mm]{new_gs_cache.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
-		\end{figure}
-		\newpage
-		
-		\begin{figure}[ht!]
-			\centering
-			\includegraphics[width=90mm]{new_gs_flops.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
-		\end{figure}
-		\newpage
-		
-		\begin{figure}[ht!]
-			\centering
-			\includegraphics[width=90mm]{new_gs_mem.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
-		\end{figure}
-		\newpage
-		
-		\subsubsection{Cálculo do Resíduo}
-		\begin{figure}[ht!]
-			\centering
-			\includegraphics[width=90mm]{new_res_cache.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
-		\end{figure}
-		\newpage
-		
-		\begin{figure}[ht!]
-			\centering
-			\includegraphics[width=90mm]{new_res_flops.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
-		\end{figure}
-		\newpage
-		
-		\begin{figure}[ht!]
-			\centering
-			\includegraphics[width=90mm]{new_res_mem.png}
-			\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa
-			\label{overflow}}
-		\end{figure}
-		\newpage
+	\newpage
 		
 	\subsection{Análise dos Dados}
-
+	
+	Nos gráficos que mostram a porcentagem de \emph{cache misses}, é visível que o número é muito maior no cálculo de Gauss-Seidel do que no cálculo do resíduo.
+	Isso se deve aos quatro desvios presentes no laço que calcula Gauss-Seidel, enquanto o cálculo do resíduo carece de desvios.
+	Além disso, há uma notável diminuição na porcentagem de \emph{cache misses} no cálculo do resíduo para uma discretização de 1024 comparada a uma de 512.
+	É possível que os números absoluto de \emph{cache misses} nas duas execuções sejam similares, mas são proporcionalmente diferentes comparados ao número da discretização.
+	
+	O cálculo do resíduo efetua muito mais operações em ponto flutuante que o cálculo de Gauss-Seidel, porque percorre uma dimensão a mais do vetor A.
+	Então, sua complexidade está na ordem de $O(n^3)$.
+	
+	Também é notável que as execuções utilizando otimização O3 sofrem de mais \emph{cache misses} e usam mais banda de memória, mas as quantidades de operações em ponto flutuante permanecem quase idênticas às das execuções sem otimização (usando O0). 
+	
 \newpage
 
 % ------------------------------------------------------ %
@@ -259,10 +202,10 @@ Para isso, otimizações foram feitas nas estruturas de dados usadas durante o c
 	Além disso, percebemos que as posições ao redor da diagonal principal sempre seguiam o seguinte padrão:
 	
 	\begin{center}
-		\texttt{$h_x$ 0 $h_y$ 1 $h_y$ 0 $h_x$}
+		\texttt{$h_x$ 0 ... 0 $h_y$ 1 $h_y$ 0 ... 0 $h_x$}
 	\end{center}
 	
-	Onde o elemento na diagonal principal é sempre $1$, $h_x$ e $h_y$ representam a dependência dos pontos adjacentes e, no exemplo acima, $n_y=2$.
+	Onde o elemento na diagonal principal é sempre $1$, $h_x$ e $h_y$ representam a dependência dos pontos adjacentes, o número de zeros varia de acordo com $n_y$.
 	Sendo assim, podíamos ignorar as posições que sempre continham $1$ ou $0$, além de evitar a repetição de $h_x$ e $h_y$.
 	
 	Também foi possível ver que os valores de $h_x$ e $h_y$ permaneciam constantes em quase todas as linhas da matriz, exceto nas linhas em que não estavam presentes.
@@ -300,10 +243,100 @@ Para isso, otimizações foram feitas nas estruturas de dados usadas durante o c
 % Resultados %
 \section{Resultados}
 
-\subsection{Tempo}
+	\subsection{Limite Superior da Discretização}
 
-\subsection{Memória}
+	\begin{align*}
+		T &\cong n_x + 1 = n_y + 1 \\
+		|X| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
+		|B| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
+		|R| &= (n_x+1)\times(n_y+1)\times8 bytes \cong T^2\times8 bytes \\
+		|X| + |B| + |R| &= 24000000000 \\
+		3\times T^2\times8 &= 24000000000 \\
+		T^2 &= 1000000000\\
+		T &\cong 31622
+	\end{align*}
 
-\newpage
+	A nova versão do programa aceita valores de até aproximadamente 31.621 para $n_y$ e $n_x$ numa máquina com 24GB de 	RAM e desconsiderando o uso de memória virtual e qualquer outro uso de memória que seja necessário.
+	%Ou seja, pode computar até 54.756 de pontos.
+	
+	%Apesar do programa original ser um desastre, o novo programa é razoável, mas mesmo assim uma bosta. Sabe porque? por causa da porra da alemanha chamada likwid! caralho.
+	
+	\subsection{Tempo de Execução}
+	\begin{figure}[ht!]
+		\centering
+		\includegraphics[width=90mm]{newtime.png}
+		\caption{Tempo para N\{x,y\} = \{500, 512, 1022, 1024, 1026, 2046, 2048\} no novo programa}
+	\end{figure}
 
+
+	\subsection{Cálculo do Número de Operações\\ em Ponto Flutuante}
+		\subsubsection{Método de Gauss-Seidel}
+		\begin{align*}
+			FLOPS(n_x,n_y) &= 8\times n_x\times n_y
+		\end{align*}
+		\subsubsection{Cálculo do Resíduo}
+		\begin{align*}
+			FLOPS(n_x,n_y) &= 9\times n_x\times n_y
+		\end{align*}
+
+	\subsection{Cálculo da Quantidade de Memória Utilizada}
+		\begin{align*}
+			MEM(n_x,n_y) &= 3\times(n_x+1)\times(n_y+1)\times 8bytes
+		\end{align*}
+
+	\newpage
+	\subsection{Gráficos de Desempenho}
+		\subsubsection{Método de Gauss-Seidel}
+		\begin{figure}[ht!]
+			\centering
+			\includegraphics[width=90mm]{new_gs_cache.png}
+			\caption{Cache misses para N\{x,y\} = \{256, 512, 1024, 2048\} no novo programa}
+		\end{figure}
+		
+		\begin{figure}[ht!]
+			\centering
+			\includegraphics[width=90mm]{new_gs_flops.png}
+			\caption{Número de operações em ponto flutante N\{x,y\} = \{256, 512, 1024, 2048\} no novo programa}
+		\end{figure}
+		
+		\newpage
+		\begin{figure}[ht!]
+			\centering
+			\includegraphics[width=90mm]{new_gs_mem.png}
+			\caption{Banda de memória para N\{x,y\} = \{256, 512, 1024, 2048\} no novo programa}
+		\end{figure}
+		
+		\newpage
+		\subsubsection{Cálculo do Resíduo}
+		\begin{figure}[ht!]
+			\centering
+			\includegraphics[width=90mm]{new_res_cache.png}
+			\caption{Cache misses para N\{x,y\} = \{256, 512, 1024, 2048\} no novo programa}
+		\end{figure}
+		
+		\begin{figure}[ht!]
+			\centering
+			\includegraphics[width=90mm]{new_res_flops.png}
+			\caption{Número de operações em ponto flutante N\{x,y\} = \{256, 512, 1024, 2048\}}
+		\end{figure}
+		
+		\newpage
+		\begin{figure}[ht!]
+			\centering
+			\includegraphics[width=90mm]{new_res_mem.png}
+			\caption{Banda de memória para N\{x,y\} = \{256, 512, 1024, 2048\} no novo programa}
+		\end{figure}
+		\newpage
+		
+	\subsection{Conclusões}
+	Como pode ser visto nos gráficos, a nova versão do programa tem muitas melhoras de performance em relação ao original.
+	
+	O tempo de execução para uma discretização de 2048, por exemplo, está uma ordem de grandeza menor que para uma discretização de 1024 (e executando tempo ainda menor que uma discretização de 512) no programa antigo.
+	
+	O número de operações em ponto flutuante no cálculo do Gauss-Seidel sofreu uma alteração pequena, mas, em compensação, houve uma diminuição dramática no número de operações no cálculo do resíduo, com valores reduzidos em duas ordens de grandeza.
+	
+	A porcentagem de \emph{cache misses} no cálculo do Gauss-Seidel também caiu em duas ordens de grandeza nas execuções sem otimizações, mas não mudou muito no cálculo dos resíduos.
+
+	A banda de memória aumentou bastante na nova versão, tanto no Gauss-Seidel quanto no resíduo, que acontece porque o programa novo executa em muito menos tempo que o original, fazendo com que a memória seja acessada mais vezes por segundo.Além disso, há menos memória a ser acessada e é acessada mais constantemente devido à remoção dos desvios condicionais durante o laço.
+	
 \end{document}

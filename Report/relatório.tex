@@ -10,6 +10,7 @@
 \usepackage{hyperref}
 \usepackage{graphicx}
 \usepackage{verbatimbox}
+\usepackage{ esint }
 
 % Definições de titulo e autores %
 \title{CI164\\Iniciação à Computação Científica\\Trabalho 2}
@@ -35,9 +36,12 @@
 % ------------------------------------------------------ %
 \section{Introdução}
 O objetivo deste trabalho é a implementação de programa para resolver o PDE:
-
 \begin{align}
-	- \Delta \times u(x,y) + k^2 \times u(x,y) = \fint(x,y), (x,y) \in \Omega
+	- \Delta u(x,y) + k^2u(x,y) &= \fint (x,y),	(x,y) \in \Omega\\
+	\fint(x,y) &= 4 \pi sin(2 \pi x) sinh(2 \pi y) \\
+	\Omega &= [0,2] \times [0,1] \\
+	u(x,1) &= sin(2 \pi x) sinh(2 \pi) \\
+	u(x,0) &= u(0,y) = u(2,y) = 0
 \end{align}
 
 Após o programa inicial foi feito, várias alterações foram feitas para melhorar o desempenho. Os métodos utilizados para análise do código, sistema de testes, otimizações de código e de estruturas de dados são descritas nas seções seguintes.

@@ -31,6 +31,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <likwid.h>
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846
@@ -269,8 +270,12 @@ int main(int argc, char **argv) {
                 likwid_markerStopRegion("Compute");
 	    }
 
+
         initial_time = timestamp();
 
+	    if(USE_LIKWID) {
+            likwid_markerStartRegion("Residue");
+        }
         // Calculate the residue norm L2
         double norm = 0;
         // Calculate A*x
@@ -291,6 +296,9 @@ int main(int argc, char **argv) {
         #endif
         normVector[k] = norm;
 
+	    if(USE_LIKWID) {
+            likwid_markerStopRegion("Residue");
+	    }
         residue_time += timestamp() - initial_time;
     }
     

@@ -2,7 +2,7 @@
     INC = -I/home/soft/likwid/include
     PROG = pdeSolver
     OBJS   = trab1.o
-    CC     = gcc -O3 -g
+    CC     = gcc -O0 -g
 
 %.o: %.c
 	$(CC) -c $(INC) $< 

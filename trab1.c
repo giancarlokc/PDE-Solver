@@ -156,6 +156,8 @@ int main(int argc, char **argv) {
         printf("Delta Y = %lf\n", deltay);
     #endif
 
+    double total_time = timestamp();
+
     // Alloc the memory for the equation (Ax = B) and for the residue
     // A uses unsigned char because we really don't need more than a byte
     double *B = (double*) malloc(n_lines*sizeof(double));
@@ -431,12 +433,13 @@ int main(int argc, char **argv) {
     }
 
     fprintf(fp, "###########\n");
+    total_time = timestamp() - total_time;
+    printf("%lf\n", total_time);
+
     // Write mean of iterations for each method
     if(method == GAUSS_SEIDEL_METHOD) {
-        printf("%lf\n", gs_time/n_iterations);
         fprintf(fp, "# Tempo método Gauss-Seidel: %lf\n", gs_time/n_iterations);
     } else if(method == OVER_RELAXATION_METHOD) {
-        printf("%lf\n", gs_time/n_iterations);
         fprintf(fp, "#%lf\n", gs_time/n_iterations);
     }
 
